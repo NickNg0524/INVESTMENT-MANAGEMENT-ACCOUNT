@@ -7,24 +7,24 @@
     <script type="text/javascript" src="https://s.tradingview.com/tv.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #30363d; display: none; }
+        .container { max-width: 1150px; margin: auto; background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #30363d; display: none; }
         
-        /* 💡 登录界面样式 */
         .auth-container { max-width: 400px; margin: 100px auto; background: #161b22; padding: 40px; border-radius: 12px; border: 1px solid #30363d; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
         .auth-container h2 { color: #58a6ff; margin-top: 0; }
         .auth-container input { width: 90%; padding: 12px; margin: 10px 0; background: #0d1117; color: white; border: 1px solid #30363d; border-radius: 6px; }
-        .auth-container button { width: 95%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background: #238636; color: white; }
+        .auth-container button { width: 95%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background: #238636; color: white; transition: 0.2s; }
         .auth-container button:hover { background: #2ea043; }
+        .auth-container button:disabled { background: #4b5563; cursor: not-allowed; }
         .auth-toggle { margin-top: 15px; font-size: 13px; color: #8b949e; cursor: pointer; }
         .auth-toggle:hover { color: #58a6ff; }
         
-        /* 顶部导航与退出登录 */
         .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #30363d; padding-bottom: 15px; margin-bottom: 25px; }
-        .top-nav h1 { color: #58a6ff; margin: 0; text-shadow: 0 0 10px rgba(88, 166, 255, 0.3); font-size: 24px; }
+        .top-nav h1 { color: #58a6ff; margin: 0; text-shadow: 0 0 10px rgba(88, 166, 255, 0.3); font-size: 22px; }
+        .nav-controls { display: flex; gap: 15px; align-items: center; }
+        .lang-select { background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; padding: 6px; border-radius: 4px; outline: none; cursor: pointer; }
         .btn-logout { background: transparent; border: 1px solid #da3633; color: #da3633; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-logout:hover { background: #da3633; color: white; }
 
-        /* 看板核心样式 */
         .global-stats { display: flex; gap: 12px; margin-bottom: 25px; }
         .stat-card { flex: 1; background: #21262d; padding: 12px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
         .stat-card h3 { margin: 0 0 6px 0; color: #8b949e; font-size: 12px; }
@@ -42,7 +42,6 @@
         .profit { color: #3fb950; font-weight: bold; text-shadow: 0 0 8px rgba(63, 185, 80, 0.4); }
         .loss { color: #f85149; font-weight: bold; text-shadow: 0 0 8px rgba(248, 81, 73, 0.4); }
 
-        button.action-btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
         .btn-save { background-color: #238636; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold;}
         .btn-edit { background: transparent; border: 1px solid #58a6ff; color: #58a6ff; padding: 4px 8px; font-size: 12px; margin-right: 5px; cursor: pointer; border-radius: 4px;}
         .btn-delete { background: transparent; border: 1px solid #da3633; color: #da3633; padding: 4px 8px; font-size: 12px; cursor: pointer; border-radius: 4px;}
@@ -56,7 +55,8 @@
         .chart-container { height: 420px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 25px; }
 
         .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
-        input[type="text"].search-input { flex: 1; padding: 10px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; }
+        .search-input { flex: 1; padding: 10px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; }
+        
         .ai-buttons-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .btn-ai { flex: 1; color: white; padding: 12px 10px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;}
         .btn-default { background-color: #238636; } .btn-financial { background-color: #316dca; } 
@@ -69,65 +69,83 @@
 </head>
 <body>
 
-<!-- 登录/注册界面 -->
-<div class="auth-container" id="authBox">
-    <h2 id="authTitle">系统登录</h2>
-    <input type="text" id="authUsername" placeholder="请输入专属用户名">
-    <input type="password" id="authPassword" placeholder="请输入密码">
-    <button onclick="handleAuth()" id="authBtn">登录系统</button>
-    <div class="auth-toggle" onclick="toggleAuthMode()" id="authToggleText">没有账号？点击注册</div>
+<!-- Language Switcher Helper -->
+<div style="text-align: right; margin-bottom: -15px;">
+    <select class="lang-select" id="outNavLang" onchange="switchLang(this.value)">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+    </select>
 </div>
 
-<!-- 主控制台 -->
+<!-- Login UI -->
+<div class="auth-container" id="authBox">
+    <h2 id="authTitle" data-i18n="authTitleLogin">系统登录</h2>
+    <input type="text" id="authUsername" data-i18n="phUsername" placeholder="请输入专属用户名">
+    <input type="password" id="authPassword" data-i18n="phPassword" placeholder="请输入密码">
+    <button onclick="handleAuth()" id="authBtn" data-i18n="authBtnLogin">登录系统</button>
+    <div class="auth-toggle" onclick="toggleAuthMode()" id="authToggleText" data-i18n="authToggleToReg">没有账号？点击注册</div>
+</div>
+
+<!-- Main Dashboard -->
 <div class="container" id="mainDashboard">
     <div class="top-nav">
-        <h1>⚡ TACTICAL INVESTMENT TERMINAL</h1>
-        <div>
-            <span style="margin-right: 15px; color: #8b949e;">当前用户: <strong id="currentUserInfo" style="color: #c9d1d9;"></strong></span>
-            <button class="btn-logout" onclick="logout()">退出登录</button>
+        <h1 data-i18n="topTitle">⚡ TACTICAL INVESTMENT TERMINAL</h1>
+        <div class="nav-controls">
+            <span style="color: #8b949e;"><span data-i18n="currentUser">当前用户:</span> <strong id="currentUserInfo" style="color: #c9d1d9;"></strong></span>
+            <select class="lang-select" id="inNavLang" onchange="switchLang(this.value)">
+                <option value="zh">中文</option>
+                <option value="en">English</option>
+            </select>
+            <button class="btn-logout" onclick="logout()" data-i18n="logout">退出登录</button>
         </div>
     </div>
 
     <div class="global-stats">
-        <div class="stat-card"><h3>总净资产</h3><div class="val" id="globalValue">$0.00</div></div>
-        <div class="stat-card"><h3>总投入成本</h3><div class="val" id="globalCost" style="color: #8b949e;">$0.00</div></div>
-        <div class="stat-card"><h3>今日盈亏</h3><div class="val" id="globalTodayPnl">$0.00</div></div>
-        <div class="stat-card"><h3>累计收益</h3><div class="val" id="globalTotalPnl">$0.00</div></div>
-        <div class="stat-card"><h3>综合盈亏比</h3><div class="val" id="globalReturn">0.00%</div></div>
+        <div class="stat-card"><h3 data-i18n="statValue">总净资产</h3><div class="val" id="globalValue">$0.00</div></div>
+        <div class="stat-card"><h3 data-i18n="statCost">总投入成本</h3><div class="val" id="globalCost" style="color: #8b949e;">$0.00</div></div>
+        <div class="stat-card"><h3 data-i18n="statTodayPnl">今日盈亏</h3><div class="val" id="globalTodayPnl">$0.00</div></div>
+        <div class="stat-card"><h3 data-i18n="statTotalPnl">累计收益</h3><div class="val" id="globalTotalPnl">$0.00</div></div>
+        <div class="stat-card"><h3 data-i18n="statReturn">综合盈亏比</h3><div class="val" id="globalReturn">0.00%</div></div>
     </div>
 
-    <!-- 📁 私人专属账户文件夹 -->
     <div class="account-folder">
         <div class="folder-header">
-            <span>📁 <strong>我的私密投资库</strong></span>
-            <span id="folderReturn" class="profit">盈亏比: +0.00%</span>
+            <span>📁 <strong data-i18n="folderTitle">我的私密投资库</strong></span>
+            <span id="folderReturn" class="profit"><span data-i18n="folderReturn">盈亏比: </span>+0.00%</span>
         </div>
         <div class="folder-body">
             <div class="add-box">
-                <span style="font-size:12px; color:#8b949e;" id="formTitle">[ + ] 添加资产：</span>
-                <input type="text" id="addTicker" placeholder="Ticker" style="width: 80px; text-transform: uppercase;">
-                <input type="number" id="addCost" step="any" placeholder="成本价" style="width: 100px;">
-                <input type="number" id="addShares" step="any" placeholder="股数" style="width: 90px;">
-                <button class="btn-save" onclick="saveStock()">💾 写入资产</button>
+                <span style="font-size:12px; color:#8b949e;" id="formTitle" data-i18n="addAssetTitle">[ + ] 添加资产：</span>
+                <input type="text" id="addTicker" data-i18n="phTicker" placeholder="Ticker" style="width: 80px; text-transform: uppercase;">
+                <input type="number" id="addCost" step="any" data-i18n="phCost" placeholder="成本价" style="width: 100px;">
+                <input type="number" id="addShares" step="any" data-i18n="phShares" placeholder="股数" style="width: 90px;">
+                <button class="btn-save" onclick="saveStock()" data-i18n="btnSave">💾 写入资产</button>
             </div>
             <table class="portfolio-table">
                 <thead>
-                    <tr><th>Asset</th><th>Cost</th><th>Current</th><th>Shares</th><th>Total Value</th><th>持仓盈亏</th><th>今日盈亏</th><th>盈亏比</th><th>Action</th></tr>
+                    <tr>
+                        <th data-i18n="thAsset">Asset</th><th data-i18n="thCost">Cost</th>
+                        <th data-i18n="thCurrent">Current</th><th data-i18n="thShares">Shares</th>
+                        <th data-i18n="thTotal">Total Value</th><th data-i18n="thHoldPnl">持仓盈亏</th>
+                        <th data-i18n="thTodayPnl">今日盈亏</th><th data-i18n="thReturn">盈亏比</th>
+                        <th data-i18n="thAction">Action</th>
+                    </tr>
                 </thead>
                 <tbody id="portfolio-body">
-                    <tr><td colspan="9" style="color: #8b949e;">加载中...</td></tr>
+                    <tr><td colspan="9" style="color: #8b949e;" data-i18n="loadingData">加载中...</td></tr>
                 </tbody>
             </table>
 
-            <button class="btn-alert" onclick="checkPortfolioAlert()">🤖 呼叫 AI 管家：深度体检与买卖建议</button>
-            <div id="alertLoading" class="loading" style="margin-top: 15px;">[ SYS ] AI 管家正在连接并分析... 请稍候...</div>
-            <div id="alertCard" class="alert-card"><div id="alertContent"></div></div>
+            <button class="btn-alert" onclick="checkPortfolioAlert()" data-i18n="btnAlert">🤖 呼叫 AI 管家：深度体检与买卖建议</button>
+            <div id="alertLoading" class="loading" style="margin-top: 15px;" data-i18n="alertLoading">[ SYS ] AI 管家正在连接并分析... 请稍候...</div>
+            <div id="alertCard" class="alert-card"><h3 style="color: #d29922; margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 8px;" data-i18n="alertTitle">📊 账户体检与买卖预警</h3><div id="alertContent"></div></div>
         </div>
     </div>
 
     <hr style="border: 1px solid #30363d; margin: 30px 0;">
-    <h2><span style="color: #58a6ff;">■</span> 资产走势图表</h2>
+    <h2><span style="color: #58a6ff;">■</span> <span data-i18n="chartTitle">资产走势图表</span></h2>
     <div class="chart-controls">
+        <span style="color: #8b949e; font-size: 14px;" data-i18n="chartTimeframe">时间周期:</span>
         <button class="time-btn" onclick="changeInterval('W', this)">WEEK</button>
         <button class="time-btn active" onclick="changeInterval('D', this)">MONTH / DAILY</button>
         <button class="time-btn" onclick="changeInterval('M', this)">QUARTER / YEAR</button>
@@ -135,18 +153,18 @@
     <div id="tvchart_container" class="chart-container"></div>
 
     <hr style="border: 1px solid #30363d; margin: 30px 0;">
-    <h2><span style="color: #58a6ff;">■</span> 个股智能扫描</h2>
+    <h2><span style="color: #58a6ff;">■</span> <span data-i18n="scanTitle">个股智能扫描</span></h2>
     <div class="search-box">
-        <input type="text" id="tickerInput" class="search-input" placeholder="输入股票代码 (如 AAPL)" value="AAPL">
-        <button class="btn-save" onclick="fetchStock()">查询数据</button>
+        <input type="text" id="tickerInput" class="search-input" data-i18n="phScan" placeholder="输入股票代码 (如 AAPL)" value="AAPL">
+        <button class="btn-save" onclick="fetchStock()" data-i18n="btnScan">查询数据</button>
     </div>
     <div class="ai-buttons-container">
-        <button class="btn-ai btn-default" onclick="analyzeStock('default')">✨ 综合长线分析</button>
-        <button class="btn-ai btn-financial" onclick="analyzeStock('financial')">📊 财务估值深挖</button>
-        <button class="btn-ai btn-technical" onclick="analyzeStock('technical')">📉 技术动能评估</button>
-        <button class="btn-ai btn-stress" onclick="analyzeStock('stress')">⚠️ 极度悲观排雷</button>
+        <button class="btn-ai btn-default" onclick="analyzeStock('default')" data-i18n="aiDefault">✨ 综合长线分析</button>
+        <button class="btn-ai btn-financial" onclick="analyzeStock('financial')" data-i18n="aiFinancial">📊 财务估值深挖</button>
+        <button class="btn-ai btn-technical" onclick="analyzeStock('technical')" data-i18n="aiTechnical">📉 技术动能评估</button>
+        <button class="btn-ai btn-stress" onclick="analyzeStock('stress')" data-i18n="aiStress">⚠️ 极度悲观排雷</button>
     </div>
-    <div id="loading" class="loading">[ SYS ] AI engine processing...</div>
+    <div id="loading" class="loading" data-i18n="aiLoading">[ SYS ] AI engine processing...</div>
     <div id="stockResult" class="result-card"></div>
     <div id="aiResult" class="ai-card"></div>
 </div>
@@ -155,52 +173,135 @@
     const API_BASE_URL = "http://127.0.0.1:8000";
     let currentInterval = "D";
     let isLoginMode = true; 
+    let sysLang = localStorage.getItem("terminal_lang") || "zh";
 
-    // 💡 验证状态检查
+    const i18n = {
+        zh: {
+            authTitleLogin: "系统登录", authTitleReg: "新用户注册", phUsername: "请输入专属用户名", phPassword: "请输入密码",
+            authBtnLogin: "登录系统", authBtnReg: "立即注册", authToggleToReg: "没有账号？点击注册", authToggleToLogin: "已有账号？返回登录",
+            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "当前用户:", logout: "退出登录",
+            statValue: "总净资产", statCost: "总投入成本", statTodayPnl: "今日盈亏", statTotalPnl: "累计收益", statReturn: "综合盈亏比",
+            folderTitle: "我的私密投资库", folderReturn: "盈亏比: ", addAssetTitle: "[ + ] 添加资产：", phTicker: "代码 (如 MU)", phCost: "成本价", phShares: "股数", btnSave: "💾 写入资产",
+            thAsset: "资产", thCost: "成本", thCurrent: "现价", thShares: "股数", thTotal: "总市值", thHoldPnl: "持仓盈亏", thTodayPnl: "今日盈亏", thReturn: "盈亏比", thAction: "操作",
+            loadingData: "加载中...", noData: "此账号暂无数据，请录入资产", btnEdit: "编辑", btnDelete: "删除",
+            btnAlert: "🤖 呼叫 AI 管家：深度体检与买卖建议", alertLoading: "[ SYS ] AI 管家正在连接并分析... 请稍候...", alertTitle: "📊 账户体检与买卖预警",
+            chartTitle: "资产走势图表", chartTimeframe: "时间周期:", scanTitle: "个股智能扫描", phScan: "输入股票代码 (如 AAPL)", btnScan: "查询数据",
+            aiDefault: "✨ 综合长线分析", aiFinancial: "📊 财务估值深挖", aiTechnical: "📉 技术动能评估", aiStress: "⚠️ 极度悲观排雷", aiLoading: "[ SYS ] AI 引擎处理中..."
+        },
+        en: {
+            authTitleLogin: "System Login", authTitleReg: "User Registration", phUsername: "Enter Username", phPassword: "Enter Password",
+            authBtnLogin: "Login", authBtnReg: "Register", authToggleToReg: "No account? Register here", authToggleToLogin: "Have an account? Login",
+            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "User:", logout: "Logout",
+            statValue: "Total Value", statCost: "Total Cost", statTodayPnl: "Today's P&L", statTotalPnl: "Total P&L", statReturn: "Return %",
+            folderTitle: "My Private Portfolio", folderReturn: "Return: ", addAssetTitle: "[ + ] Add Asset:", phTicker: "Ticker (e.g. MU)", phCost: "Cost", phShares: "Shares", btnSave: "💾 Save Asset",
+            thAsset: "Asset", thCost: "Cost", thCurrent: "Current", thShares: "Shares", thTotal: "Total Value", thHoldPnl: "Hold P&L", thTodayPnl: "Today P&L", thReturn: "Return", thAction: "Action",
+            loadingData: "Loading...", noData: "No data found. Please add assets.", btnEdit: "Edit", btnDelete: "Delete",
+            btnAlert: "🤖 Call AI Manager: Portfolio Health Check & Trade Alerts", alertLoading: "[ SYS ] AI Manager analyzing... Please wait...", alertTitle: "📊 Portfolio Health & Trade Alerts",
+            chartTitle: "Performance Chart", chartTimeframe: "Timeframe:", scanTitle: "Smart Asset Scanner", phScan: "Enter Ticker (e.g. AAPL)", btnScan: "Search Data",
+            aiDefault: "✨ General Long-term", aiFinancial: "📊 Financial Deep-Dive", aiTechnical: "📉 Technical Momentum", aiStress: "⚠️ Extreme Stress Test", aiLoading: "[ SYS ] AI engine processing..."
+        }
+    };
+
+    function switchLang(lang) {
+        if(!i18n[lang]) lang = "zh";
+        sysLang = lang;
+        localStorage.setItem("terminal_lang", lang);
+        document.getElementById('outNavLang').value = lang;
+        document.getElementById('inNavLang').value = lang;
+        
+        document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (i18n[lang][key]) {
+                if (el.tagName === "INPUT") el.placeholder = i18n[lang][key];
+                else el.innerText = i18n[lang][key];
+            }
+        });
+
+        if(document.getElementById("mainDashboard").style.display === "block") {
+            loadDashboard();
+        } else {
+            toggleAuthMode(isLoginMode);
+        }
+    }
+
     window.onload = function() {
+        switchLang(sysLang);
         const token = localStorage.getItem("terminal_user_token");
         if(token) {
             document.getElementById("authBox").style.display = "none";
+            document.getElementById("outNavLang").style.display = "none";
             document.getElementById("mainDashboard").style.display = "block";
             document.getElementById("currentUserInfo").innerText = token.toUpperCase();
             loadDashboard();
             renderChart('AAPL', currentInterval);
         } else {
             document.getElementById("authBox").style.display = "block";
+            document.getElementById("outNavLang").style.display = "inline-block";
             document.getElementById("mainDashboard").style.display = "none";
         }
     };
 
-    // 💡 身份认证交互
-    function toggleAuthMode() {
-        isLoginMode = !isLoginMode;
-        document.getElementById("authTitle").innerText = isLoginMode ? "系统登录" : "新用户注册";
-        document.getElementById("authBtn").innerText = isLoginMode ? "登录系统" : "立即注册";
-        document.getElementById("authToggleText").innerText = isLoginMode ? "没有账号？点击注册" : "已有账号？返回登录";
+    function toggleAuthMode(forceState = null) {
+        if(forceState !== null) isLoginMode = forceState;
+        else isLoginMode = !isLoginMode;
+        
+        document.getElementById("authTitle").innerText = i18n[sysLang][isLoginMode ? "authTitleLogin" : "authTitleReg"];
+        document.getElementById("authBtn").innerText = i18n[sysLang][isLoginMode ? "authBtnLogin" : "authBtnReg"];
+        document.getElementById("authToggleText").innerText = i18n[sysLang][isLoginMode ? "authToggleToReg" : "authToggleToLogin"];
     }
 
+    // 💡 彻底防卡死的网络请求：任何错误必须弹窗报警！
     async function handleAuth() {
         const u = document.getElementById("authUsername").value.trim();
         const p = document.getElementById("authPassword").value.trim();
-        if(!u || !p) return alert("请完整填写账号和密码");
+        
+        if(!u || !p) {
+            alert(sysLang === 'en' ? "Please fill in all fields!" : "⚠️ 账号和密码不能为空！");
+            return;
+        }
+
+        const btn = document.getElementById("authBtn");
+        const originalText = btn.innerText;
+        btn.innerText = sysLang === 'en' ? "Connecting..." : "⏳ 连接服务器中...";
+        btn.disabled = true;
 
         const endpoint = isLoginMode ? "/api/login" : "/api/register";
+        
         try {
             const res = await fetch(API_BASE_URL + endpoint, {
-                method: "POST", headers: { "Content-Type": "application/json" },
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: u, password: p })
             });
+            
             const data = await res.json();
-            if(!res.ok) throw new Error(data.detail || "操作失败");
+            
+            if(!res.ok) {
+                // 如果是 401，极大概率是后台重启了导致失忆
+                if (res.status === 401) {
+                    throw new Error(sysLang === 'en' ? "Invalid account or password!\n(Note: If backend restarted, you must register again)" : "❌ 账号不存在或密码错误！\n(提示：由于是测试版，只要重启了黑框框，账号就会被清空，请点击下方重新注册！)");
+                }
+                throw new Error(data.detail || "请求错误");
+            }
 
             if(!isLoginMode) {
-                alert("注册成功！请登录。");
-                toggleAuthMode();
+                alert(sysLang === 'en' ? "🎉 Registration successful! Please login." : "🎉 注册成功！请切换到登录界面进行登录。");
+                toggleAuthMode(true);
             } else {
                 localStorage.setItem("terminal_user_token", data.token);
                 window.location.reload();
             }
-        } catch(e) { alert(e.message); }
+        } catch(e) { 
+            // 抓取最底层的网络断开错误
+            if (e.message.includes("Failed to fetch") || e.message.includes("NetworkError")) {
+                alert(sysLang === 'en' ? "🚨 Connection to Local Server Failed!\nIs your python terminal running?" : "🚨 致命错误：连不上本地服务器！\n\n请检查：\n1. 黑框框 (终端) 里有没有运行程序？\n2. 终端有没有报错退出？");
+            } else {
+                alert(e.message); 
+            }
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
     }
 
     function logout() {
@@ -208,11 +309,11 @@
         window.location.reload();
     }
 
-    // 💡 带身份验证的数据请求
     function getHeaders() {
         return {
             "Content-Type": "application/json",
-            "x-user-id": localStorage.getItem("terminal_user_token")
+            "x-user-id": localStorage.getItem("terminal_user_token"),
+            "x-language": sysLang 
         };
     }
 
@@ -230,11 +331,12 @@
             document.getElementById('globalTotalPnl').className = `val ${data.profit_loss_val >= 0 ? 'profit' : 'loss'}`;
             document.getElementById('globalReturn').innerText = `${data.profit_loss_pct >= 0 ? '+' : ''}${data.profit_loss_pct}%`;
             document.getElementById('globalReturn').className = `val ${data.profit_loss_pct >= 0 ? 'profit' : 'loss'}`;
+            document.getElementById('folderReturn').innerText = `${i18n[sysLang]["folderReturn"]}${data.profit_loss_pct >= 0 ? '+' : ''}${data.profit_loss_pct}%`;
             
             const tbody = document.getElementById('portfolio-body');
             tbody.innerHTML = ""; 
             if(data.items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="color: #8b949e;">此账号暂无数据，请录入资产</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="color: #8b949e;">${i18n[sysLang]["noData"]}</td></tr>`;
                 return;
             }
 
@@ -253,13 +355,13 @@
                         <td class="${tClass}">${i.today_pnl >= 0 ? '+' : ''}$${i.today_pnl.toFixed(2)}</td>
                         <td class="${pClass}">${i.profit_loss_pct >= 0 ? '+' : ''}${i.profit_loss_pct}%</td>
                         <td>
-                            <button class="btn-edit" onclick="editStock('${i.symbol}', ${i.cost_price}, ${i.shares})">Edit</button>
-                            <button class="btn-delete" onclick="deleteStock('${i.symbol}')">删除</button>
+                            <button class="btn-edit" onclick="editStock('${i.symbol}', ${i.cost_price}, ${i.shares})">${i18n[sysLang]["btnEdit"]}</button>
+                            <button class="btn-delete" onclick="deleteStock('${i.symbol}')">${i18n[sysLang]["btnDelete"]}</button>
                         </td>
                     </tr>
                 `;
             });
-        } catch (e) { console.error(e); }
+        } catch (e) {}
     }
 
     function editStock(symbol, cost, shares) {
@@ -267,14 +369,13 @@
         document.getElementById('addTicker').disabled = true; 
         document.getElementById('addCost').value = cost;
         document.getElementById('addShares').value = shares;
-        document.getElementById('formTitle').innerText = "[ ✏️ 编辑资产 ]:";
     }
 
     async function saveStock() {
         const symbol = document.getElementById('addTicker').value.trim();
         const cost_price = parseFloat(document.getElementById('addCost').value);
         const shares = parseFloat(document.getElementById('addShares').value);
-        if(!symbol || isNaN(cost_price) || isNaN(shares)) return alert("请完整填写信息");
+        if(!symbol || isNaN(cost_price) || isNaN(shares)) return alert("Error");
 
         await fetch(`${API_BASE_URL}/api/portfolio`, {
             method: "POST", headers: getHeaders(), body: JSON.stringify({ symbol, cost_price, shares })
@@ -284,12 +385,11 @@
         document.getElementById('addTicker').disabled = false;
         document.getElementById('addCost').value = "";
         document.getElementById('addShares').value = "";
-        document.getElementById('formTitle').innerText = "[ + ] 添加资产：";
         loadDashboard();
     }
 
     async function deleteStock(symbol) {
-        if(!confirm(`确定删除 ${symbol} 吗？`)) return;
+        if(!confirm(`Delete / 删除 ${symbol}?`)) return;
         await fetch(`${API_BASE_URL}/api/portfolio/${symbol}`, { method: "DELETE", headers: getHeaders() });
         loadDashboard();
     }
@@ -330,23 +430,23 @@
         if(!ticker) return;
         renderChart(ticker, currentInterval);
         try {
-            const res = await fetch(`${API_BASE_URL}/api/stock/${ticker}`);
+            const res = await fetch(`${API_BASE_URL}/api/stock/${ticker}`, { method: "GET" });
             const data = await res.json();
             document.getElementById('stockResult').style.display = 'block';
-            document.getElementById('stockResult').innerHTML = `<strong>${data.name || data.symbol}</strong> 当前价: $${data.current_price} | 市盈率: ${data.pe_ratio || 'N/A'}`;
+            document.getElementById('stockResult').innerHTML = `<strong>${data.name || data.symbol}</strong> ($${data.current_price}) | PE: ${data.pe_ratio || 'N/A'}`;
         } catch(e) {}
     }
 
     async function analyzeStock(perspective) {
         const ticker = document.getElementById('tickerInput').value.trim();
-        if(!ticker) return alert("请先输入代码");
+        if(!ticker) return;
         
         document.getElementById('loading').style.display = 'block';
         document.getElementById('aiResult').style.display = 'none';
         try {
             const res = await fetch(`${API_BASE_URL}/api/ai-analyze`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ticker, perspective })
+                method: "POST", headers: getHeaders(),
+                body: JSON.stringify({ ticker: ticker, perspective: perspective, language: sysLang }) 
             });
             const data = await res.json();
             document.getElementById('aiResult').innerText = data.ai_analysis;
