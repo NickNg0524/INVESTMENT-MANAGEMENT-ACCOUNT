@@ -43,8 +43,7 @@ FREE_MODELS_POOL = [
     "google/gemini-2.0-flash-exp:free"
 ]
 
-# 核心破解逻辑：直接伪装请求避开 yfinance 封锁
-# 核心破解逻辑：直接伪装请求避开 yfinance 封锁，并双通道获取 PE
+# 核心破解逻辑：直接伪装请求避开封锁，改用无 Cookie 墙的 v7 quote 接口
 def fetch_stock_internal(ticker: str) -> dict:
     symbol_str = ticker.upper()
     current_time = time.time()
@@ -53,45 +52,36 @@ def fetch_stock_internal(ticker: str) -> dict:
         return PRICE_CACHE[symbol_str]['data']
 
     try:
-        # 通道 1：极速获取价格 (防封锁)
-        url_price = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol_str}"
-        req_price = urllib.request.Request(url_price, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'})
+        # 直接使用 v7 quote 接口，避开 Cookie 验证模块，一次性拿齐价格和 PE
+        url = f"https://query2.finance.yahoo.com/v7/finance/quote?symbols={symbol_str}"
+        req = urllib.request.Request(
+            url, 
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept': 'application/json'
+            }
+        )
         
-        with urllib.request.urlopen(req_price, timeout=10) as response:
-            data_price = json.loads(response.read().decode())
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode())
             
-        result_data = data_price['chart']['result'][0]['meta']
-        current_price = result_data.get('regularMarketPrice')
-        prev_close = result_data.get('chartPreviousClose')
+        res_list = data.get('quoteResponse', {}).get('result', [])
+        if not res_list:
+            raise ValueError("Target not found or completely blocked")
+            
+        quote = res_list[0]
+        current_price = quote.get('regularMarketPrice')
+        prev_close = quote.get('regularMarketPreviousClose')
         
         if current_price is None:
             raise ValueError("Price not found")
             
         change_pct = round(((current_price - prev_close) / prev_close) * 100, 2) if current_price and prev_close else 0.0
         
-        # 通道 2：附加获取 PE 和全名
-        pe_ratio = "N/A"
-        stock_name = symbol_str
-        try:
-            url_quote = f"https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol_str}?modules=summaryDetail,price"
-            req_quote = urllib.request.Request(url_quote, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'})
-            with urllib.request.urlopen(req_quote, timeout=5) as response:
-                data_quote = json.loads(response.read().decode())
-                res = data_quote.get('quoteSummary', {}).get('result', [{}])[0]
-                
-                # 提取 PE
-                pe_obj = res.get('summaryDetail', {}).get('trailingPE', {})
-                if pe_obj and 'fmt' in pe_obj:
-                    pe_ratio = pe_obj['fmt']
-                elif pe_obj and 'raw' in pe_obj:
-                    pe_ratio = str(round(pe_obj['raw'], 2))
-                    
-                # 提取股票全名 (如 Apple Inc.)
-                name_obj = res.get('price', {}).get('shortName')
-                if name_obj:
-                    stock_name = name_obj
-        except Exception:
-            pass # 如果财务接口被限流，静默失败，保留 N/A，但确保价格正常显示
+        # 提取 PE (市盈率) 和全名
+        pe_val = quote.get('trailingPE')
+        pe_ratio = str(round(pe_val, 2)) if pe_val is not None else "N/A"
+        stock_name = quote.get('longName') or quote.get('shortName') or symbol_str
         
         result = {
             "symbol": symbol_str,
@@ -99,7 +89,7 @@ def fetch_stock_internal(ticker: str) -> dict:
             "current_price": current_price,
             "previous_close": prev_close,
             "change_percent": change_pct,
-            "currency": result_data.get("currency", "USD"),
+            "currency": quote.get("currency", "USD"),
             "pe_ratio": pe_ratio
         }
         
