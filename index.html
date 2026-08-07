@@ -14,9 +14,6 @@
         .auth-container input { width: 90%; padding: 12px; margin: 10px 0; background: #0d1117; color: white; border: 1px solid #30363d; border-radius: 6px; }
         .auth-container button { width: 95%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background: #238636; color: white; transition: 0.2s; }
         .auth-container button:hover { background: #2ea043; }
-        .auth-container button:disabled { background: #4b5563; cursor: not-allowed; }
-        .auth-toggle { margin-top: 15px; font-size: 13px; color: #8b949e; cursor: pointer; }
-        .auth-toggle:hover { color: #58a6ff; }
         
         .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #30363d; padding-bottom: 15px; margin-bottom: 25px; }
         .top-nav h1 { color: #58a6ff; margin: 0; text-shadow: 0 0 10px rgba(88, 166, 255, 0.3); font-size: 22px; }
@@ -69,7 +66,6 @@
 </head>
 <body>
 
-<!-- Language Switcher Helper -->
 <div style="text-align: right; margin-bottom: -15px;">
     <select class="lang-select" id="outNavLang" onchange="switchLang(this.value)">
         <option value="zh">中文</option>
@@ -79,11 +75,10 @@
 
 <!-- Login UI -->
 <div class="auth-container" id="authBox">
-    <h2 id="authTitle" data-i18n="authTitleLogin">系统登录</h2>
-    <input type="text" id="authUsername" data-i18n="phUsername" placeholder="请输入专属用户名">
-    <input type="password" id="authPassword" data-i18n="phPassword" placeholder="请输入密码">
-    <button onclick="handleAuth()" id="authBtn" data-i18n="authBtnLogin">登录系统</button>
-    <div class="auth-toggle" onclick="toggleAuthMode()" id="authToggleText" data-i18n="authToggleToReg">没有账号？点击注册</div>
+    <h2 id="authTitle" data-i18n="authTitleLogin">系统安全验证</h2>
+    <p style="font-size: 13px; color: #8b949e; margin-bottom: 20px;">*采用 Local-First 架构，数据100%保存在本地浏览器</p>
+    <input type="text" id="authUsername" data-i18n="phUsername" placeholder="请输入专属用户名 (首次输入即自动注册)">
+    <button onclick="handleAuth()" id="authBtn" data-i18n="authBtnLogin">开启终端</button>
 </div>
 
 <!-- Main Dashboard -->
@@ -96,7 +91,7 @@
                 <option value="zh">中文</option>
                 <option value="en">English</option>
             </select>
-            <button class="btn-logout" onclick="logout()" data-i18n="logout">退出登录</button>
+            <button class="btn-logout" onclick="logout()" data-i18n="logout">清空缓存并退出</button>
         </div>
     </div>
 
@@ -170,32 +165,35 @@
 </div>
 
 <script>
+    // 💡 这里已经配好了你的 Account2 线上地址！
     const API_BASE_URL = "https://investment-management-account2.onrender.com";
     let currentInterval = "D";
-    let isLoginMode = true; 
     let sysLang = localStorage.getItem("terminal_lang") || "zh";
+    
+    // 💡 全新的本地持仓存储库
+    let userPortfolio = JSON.parse(localStorage.getItem("terminal_portfolio")) || [];
 
     const i18n = {
         zh: {
-            authTitleLogin: "系统登录", authTitleReg: "新用户注册", phUsername: "请输入专属用户名", phPassword: "请输入密码",
-            authBtnLogin: "登录系统", authBtnReg: "立即注册", authToggleToReg: "没有账号？点击注册", authToggleToLogin: "已有账号？返回登录",
-            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "当前用户:", logout: "退出登录",
+            authTitleLogin: "系统安全验证", phUsername: "请输入专属用户名 (首次输入自动保存)",
+            authBtnLogin: "开启终端",
+            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "当前用户:", logout: "清空缓存并退出",
             statValue: "总净资产", statCost: "总投入成本", statTodayPnl: "今日盈亏", statTotalPnl: "累计收益", statReturn: "综合盈亏比",
             folderTitle: "我的私密投资库", folderReturn: "盈亏比: ", addAssetTitle: "[ + ] 添加资产：", phTicker: "代码 (如 MU)", phCost: "成本价", phShares: "股数", btnSave: "💾 写入资产",
             thAsset: "资产", thCost: "成本", thCurrent: "现价", thShares: "股数", thTotal: "总市值", thHoldPnl: "持仓盈亏", thTodayPnl: "今日盈亏", thReturn: "盈亏比", thAction: "操作",
-            loadingData: "加载中...", noData: "此账号暂无数据，请录入资产", btnEdit: "编辑", btnDelete: "删除",
+            loadingData: "正在向华尔街请求实时数据，请稍候...", noData: "此账号暂无数据，请录入资产", btnEdit: "编辑", btnDelete: "删除",
             btnAlert: "🤖 呼叫 AI 管家：深度体检与买卖建议", alertLoading: "[ SYS ] AI 管家正在连接并分析... 请稍候...", alertTitle: "📊 账户体检与买卖预警",
             chartTitle: "资产走势图表", chartTimeframe: "时间周期:", scanTitle: "个股智能扫描", phScan: "输入股票代码 (如 AAPL)", btnScan: "查询数据",
             aiDefault: "✨ 综合长线分析", aiFinancial: "📊 财务估值深挖", aiTechnical: "📉 技术动能评估", aiStress: "⚠️ 极度悲观排雷", aiLoading: "[ SYS ] AI 引擎处理中..."
         },
         en: {
-            authTitleLogin: "System Login", authTitleReg: "User Registration", phUsername: "Enter Username", phPassword: "Enter Password",
-            authBtnLogin: "Login", authBtnReg: "Register", authToggleToReg: "No account? Register here", authToggleToLogin: "Have an account? Login",
-            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "User:", logout: "Logout",
+            authTitleLogin: "Security Gateway", phUsername: "Enter Username (Saves locally)",
+            authBtnLogin: "Enter Terminal",
+            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "User:", logout: "Clear Data & Exit",
             statValue: "Total Value", statCost: "Total Cost", statTodayPnl: "Today's P&L", statTotalPnl: "Total P&L", statReturn: "Return %",
             folderTitle: "My Private Portfolio", folderReturn: "Return: ", addAssetTitle: "[ + ] Add Asset:", phTicker: "Ticker (e.g. MU)", phCost: "Cost", phShares: "Shares", btnSave: "💾 Save Asset",
             thAsset: "Asset", thCost: "Cost", thCurrent: "Current", thShares: "Shares", thTotal: "Total Value", thHoldPnl: "Hold P&L", thTodayPnl: "Today P&L", thReturn: "Return", thAction: "Action",
-            loadingData: "Loading...", noData: "No data found. Please add assets.", btnEdit: "Edit", btnDelete: "Delete",
+            loadingData: "Fetching live data from Wall Street...", noData: "No data found. Please add assets.", btnEdit: "Edit", btnDelete: "Delete",
             btnAlert: "🤖 Call AI Manager: Portfolio Health Check & Trade Alerts", alertLoading: "[ SYS ] AI Manager analyzing... Please wait...", alertTitle: "📊 Portfolio Health & Trade Alerts",
             chartTitle: "Performance Chart", chartTimeframe: "Timeframe:", scanTitle: "Smart Asset Scanner", phScan: "Enter Ticker (e.g. AAPL)", btnScan: "Search Data",
             aiDefault: "✨ General Long-term", aiFinancial: "📊 Financial Deep-Dive", aiTechnical: "📉 Technical Momentum", aiStress: "⚠️ Extreme Stress Test", aiLoading: "[ SYS ] AI engine processing..."
@@ -217,11 +215,7 @@
             }
         });
 
-        if(document.getElementById("mainDashboard").style.display === "block") {
-            loadDashboard();
-        } else {
-            toggleAuthMode(isLoginMode);
-        }
+        if(document.getElementById("mainDashboard").style.display === "block") loadDashboard();
     }
 
     window.onload = function() {
@@ -241,127 +235,108 @@
         }
     };
 
-    function toggleAuthMode(forceState = null) {
-        if(forceState !== null) isLoginMode = forceState;
-        else isLoginMode = !isLoginMode;
-        
-        document.getElementById("authTitle").innerText = i18n[sysLang][isLoginMode ? "authTitleLogin" : "authTitleReg"];
-        document.getElementById("authBtn").innerText = i18n[sysLang][isLoginMode ? "authBtnLogin" : "authBtnReg"];
-        document.getElementById("authToggleText").innerText = i18n[sysLang][isLoginMode ? "authToggleToReg" : "authToggleToLogin"];
-    }
-
-    // 💡 彻底防卡死的网络请求：任何错误必须弹窗报警！
-    async function handleAuth() {
+    // 💡 纯粹安全的本地存储登录，直接跨过云端服务器的干扰
+    function handleAuth() {
         const u = document.getElementById("authUsername").value.trim();
-        const p = document.getElementById("authPassword").value.trim();
+        if(!u) return alert(sysLang === 'en' ? "Please fill in username!" : "⚠️ 必须输入用户名！");
         
-        if(!u || !p) {
-            alert(sysLang === 'en' ? "Please fill in all fields!" : "⚠️ 账号和密码不能为空！");
-            return;
-        }
-
-        const btn = document.getElementById("authBtn");
-        const originalText = btn.innerText;
-        btn.innerText = sysLang === 'en' ? "Connecting..." : "⏳ 连接服务器中...";
-        btn.disabled = true;
-
-        const endpoint = isLoginMode ? "/api/login" : "/api/register";
-        
-        try {
-            const res = await fetch(API_BASE_URL + endpoint, {
-                method: "POST", 
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: u, password: p })
-            });
-            
-            const data = await res.json();
-            
-            if(!res.ok) {
-                // 如果是 401，极大概率是后台重启了导致失忆
-                if (res.status === 401) {
-                    throw new Error(sysLang === 'en' ? "Invalid account or password!\n(Note: If backend restarted, you must register again)" : "❌ 账号不存在或密码错误！\n(提示：由于是测试版，只要重启了黑框框，账号就会被清空，请点击下方重新注册！)");
-                }
-                throw new Error(data.detail || "请求错误");
-            }
-
-            if(!isLoginMode) {
-                alert(sysLang === 'en' ? "🎉 Registration successful! Please login." : "🎉 注册成功！请切换到登录界面进行登录。");
-                toggleAuthMode(true);
-            } else {
-                localStorage.setItem("terminal_user_token", data.token);
-                window.location.reload();
-            }
-        } catch(e) { 
-            // 抓取最底层的网络断开错误
-            if (e.message.includes("Failed to fetch") || e.message.includes("NetworkError")) {
-                alert(sysLang === 'en' ? "🚨 Connection to Local Server Failed!\nIs your python terminal running?" : "🚨 致命错误：连不上本地服务器！\n\n请检查：\n1. 黑框框 (终端) 里有没有运行程序？\n2. 终端有没有报错退出？");
-            } else {
-                alert(e.message); 
-            }
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
+        localStorage.setItem("terminal_user_token", u);
+        window.location.reload();
     }
 
     function logout() {
         localStorage.removeItem("terminal_user_token");
+        localStorage.removeItem("terminal_portfolio"); // 清空本地数据
         window.location.reload();
     }
 
-    function getHeaders() {
-        return {
-            "Content-Type": "application/json",
-            "x-user-id": localStorage.getItem("terminal_user_token"),
-            "x-language": sysLang 
-        };
+    // 防卡死网络请求
+    async function safeFetch(endpoint, options) {
+        try {
+            return await fetch(API_BASE_URL + endpoint, options);
+        } catch(e) {
+            if(e.message === "Failed to fetch") {
+                console.error("Connection Failed. Server might be sleeping.");
+            }
+            throw e;
+        }
     }
 
+    // 💡 彻底抛弃云端数据库，直接读取本地数据去云端拿价格，极速！
     async function loadDashboard() {
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/portfolio`, { headers: getHeaders() });
-            if(res.status === 401) return logout();
-            const data = await res.json();
-            
-            document.getElementById('globalValue').innerText = `$${data.total_value.toFixed(2)}`;
-            document.getElementById('globalCost').innerText = `$${data.total_cost.toFixed(2)}`;
-            document.getElementById('globalTodayPnl').innerText = `${data.today_pnl >= 0 ? '+' : ''}$${data.today_pnl.toFixed(2)}`;
-            document.getElementById('globalTodayPnl').className = `val ${data.today_pnl >= 0 ? 'profit' : 'loss'}`;
-            document.getElementById('globalTotalPnl').innerText = `${data.profit_loss_val >= 0 ? '+' : ''}$${data.profit_loss_val.toFixed(2)}`;
-            document.getElementById('globalTotalPnl').className = `val ${data.profit_loss_val >= 0 ? 'profit' : 'loss'}`;
-            document.getElementById('globalReturn').innerText = `${data.profit_loss_pct >= 0 ? '+' : ''}${data.profit_loss_pct}%`;
-            document.getElementById('globalReturn').className = `val ${data.profit_loss_pct >= 0 ? 'profit' : 'loss'}`;
-            document.getElementById('folderReturn').innerText = `${i18n[sysLang]["folderReturn"]}${data.profit_loss_pct >= 0 ? '+' : ''}${data.profit_loss_pct}%`;
-            
-            const tbody = document.getElementById('portfolio-body');
-            tbody.innerHTML = ""; 
-            if(data.items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="color: #8b949e;">${i18n[sysLang]["noData"]}</td></tr>`;
-                return;
-            }
+        let totalVal = 0, totalCost = 0, grandTodayPnl = 0;
+        const tbody = document.getElementById('portfolio-body');
+        tbody.innerHTML = ""; 
 
-            data.items.forEach(i => {
-                let pClass = i.profit_loss_pct >= 0 ? 'profit' : 'loss';
-                let tClass = i.today_pnl >= 0 ? 'profit' : 'loss';
-                let vClass = i.profit_loss_val >= 0 ? 'profit' : 'loss';
-                tbody.innerHTML += `
+        if(userPortfolio.length === 0) {
+            document.getElementById('globalValue').innerText = "$0.00";
+            document.getElementById('globalCost').innerText = "$0.00";
+            document.getElementById('globalTodayPnl').innerText = "$0.00";
+            document.getElementById('globalTotalPnl').innerText = "$0.00";
+            document.getElementById('globalReturn').innerText = "0.00%";
+            tbody.innerHTML = `<tr><td colspan="9" style="color: #8b949e;">${i18n[sysLang]["noData"]}</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = `<tr><td colspan="9" style="color: #8b949e;">${i18n[sysLang]["loadingData"]}</td></tr>`;
+        let htmlRows = "";
+
+        for (let item of userPortfolio) {
+            try {
+                const res = await safeFetch(`/api/stock/${item.symbol}`, { method: "GET" });
+                const s_data = await res.json();
+                
+                const curPrice = s_data.current_price;
+                const prevClose = s_data.previous_close;
+                const totVal = curPrice * item.shares;
+                const totCost = item.cost_price * item.shares;
+                const plVal = totVal - totCost;
+                const plPct = totCost > 0 ? (plVal / totCost) * 100 : 0;
+                const todayPnlVal = prevClose ? item.shares * (curPrice - prevClose) : 0;
+
+                grandTodayPnl += todayPnlVal;
+                totalVal += totVal;
+                totalCost += totCost;
+
+                let pClass = plPct >= 0 ? 'profit' : 'loss';
+                let tClass = todayPnlVal >= 0 ? 'profit' : 'loss';
+                let vClass = plVal >= 0 ? 'profit' : 'loss';
+
+                htmlRows += `
                     <tr>
-                        <td style="color: #58a6ff; font-weight: bold; cursor:pointer;" onclick="switchChart('${i.symbol}')">${i.symbol}</td>
-                        <td>$${i.cost_price.toFixed(2)}</td>
-                        <td>$${i.current_price.toFixed(2)}</td>
-                        <td>${i.shares}</td>
-                        <td>$${i.total_value.toFixed(2)}</td>
-                        <td class="${vClass}">${i.profit_loss_val >= 0 ? '+' : ''}$${i.profit_loss_val.toFixed(2)}</td>
-                        <td class="${tClass}">${i.today_pnl >= 0 ? '+' : ''}$${i.today_pnl.toFixed(2)}</td>
-                        <td class="${pClass}">${i.profit_loss_pct >= 0 ? '+' : ''}${i.profit_loss_pct}%</td>
+                        <td style="color: #58a6ff; font-weight: bold; cursor:pointer;" onclick="switchChart('${item.symbol}')">${item.symbol}</td>
+                        <td>$${item.cost_price.toFixed(2)}</td>
+                        <td>$${curPrice.toFixed(2)}</td>
+                        <td>${item.shares}</td>
+                        <td>$${totVal.toFixed(2)}</td>
+                        <td class="${vClass}">${plVal >= 0 ? '+' : ''}$${plVal.toFixed(2)}</td>
+                        <td class="${tClass}">${todayPnlVal >= 0 ? '+' : ''}$${todayPnlVal.toFixed(2)}</td>
+                        <td class="${pClass}">${plPct >= 0 ? '+' : ''}${plPct.toFixed(2)}%</td>
                         <td>
-                            <button class="btn-edit" onclick="editStock('${i.symbol}', ${i.cost_price}, ${i.shares})">${i18n[sysLang]["btnEdit"]}</button>
-                            <button class="btn-delete" onclick="deleteStock('${i.symbol}')">${i18n[sysLang]["btnDelete"]}</button>
+                            <button class="btn-edit" onclick="editStock('${item.symbol}', ${item.cost_price}, ${item.shares})">${i18n[sysLang]["btnEdit"]}</button>
+                            <button class="btn-delete" onclick="deleteStock('${item.symbol}')">${i18n[sysLang]["btnDelete"]}</button>
                         </td>
                     </tr>
                 `;
-            });
-        } catch (e) {}
+            } catch (e) {
+                htmlRows += `<tr><td colspan="9" style="color: #f85149;">Error loading ${item.symbol}</td></tr>`;
+            }
+        }
+
+        tbody.innerHTML = htmlRows;
+        
+        let grandPlVal = totalVal - totalCost;
+        let grandPlPct = totalCost > 0 ? (grandPlVal / totalCost) * 100 : 0;
+
+        document.getElementById('globalValue').innerText = `$${totalVal.toFixed(2)}`;
+        document.getElementById('globalCost').innerText = `$${totalCost.toFixed(2)}`;
+        document.getElementById('globalTodayPnl').innerText = `${grandTodayPnl >= 0 ? '+' : ''}$${grandTodayPnl.toFixed(2)}`;
+        document.getElementById('globalTodayPnl').className = `val ${grandTodayPnl >= 0 ? 'profit' : 'loss'}`;
+        document.getElementById('globalTotalPnl').innerText = `${grandPlVal >= 0 ? '+' : ''}$${grandPlVal.toFixed(2)}`;
+        document.getElementById('globalTotalPnl').className = `val ${grandPlVal >= 0 ? 'profit' : 'loss'}`;
+        document.getElementById('globalReturn').innerText = `${grandPlPct >= 0 ? '+' : ''}${grandPlPct.toFixed(2)}%`;
+        document.getElementById('globalReturn').className = `val ${grandPlPct >= 0 ? 'profit' : 'loss'}`;
+        document.getElementById('folderReturn').innerText = `${i18n[sysLang]["folderReturn"]}${grandPlPct >= 0 ? '+' : ''}${grandPlPct.toFixed(2)}%`;
     }
 
     function editStock(symbol, cost, shares) {
@@ -371,15 +346,22 @@
         document.getElementById('addShares').value = shares;
     }
 
-    async function saveStock() {
-        const symbol = document.getElementById('addTicker').value.trim();
+    // 💡 本地无缝保存数据
+    function saveStock() {
+        const symbol = document.getElementById('addTicker').value.trim().toUpperCase();
         const cost_price = parseFloat(document.getElementById('addCost').value);
         const shares = parseFloat(document.getElementById('addShares').value);
-        if(!symbol || isNaN(cost_price) || isNaN(shares)) return alert("Error");
+        if(!symbol || isNaN(cost_price) || isNaN(shares)) return alert("Error/格式错误");
 
-        await fetch(`${API_BASE_URL}/api/portfolio`, {
-            method: "POST", headers: getHeaders(), body: JSON.stringify({ symbol, cost_price, shares })
-        });
+        let existing = userPortfolio.find(i => i.symbol === symbol);
+        if(existing) {
+            existing.cost_price = cost_price;
+            existing.shares = shares;
+        } else {
+            userPortfolio.push({symbol, cost_price, shares});
+        }
+        
+        localStorage.setItem("terminal_portfolio", JSON.stringify(userPortfolio));
         
         document.getElementById('addTicker').value = "";
         document.getElementById('addTicker').disabled = false;
@@ -388,17 +370,27 @@
         loadDashboard();
     }
 
-    async function deleteStock(symbol) {
+    function deleteStock(symbol) {
         if(!confirm(`Delete / 删除 ${symbol}?`)) return;
-        await fetch(`${API_BASE_URL}/api/portfolio/${symbol}`, { method: "DELETE", headers: getHeaders() });
+        userPortfolio = userPortfolio.filter(i => i.symbol !== symbol);
+        localStorage.setItem("terminal_portfolio", JSON.stringify(userPortfolio));
         loadDashboard();
     }
 
+    // 💡 直接打包本地数据传给 AI 处理，安全且不怕掉线
     async function checkPortfolioAlert() {
+        if (userPortfolio.length === 0) return;
         document.getElementById('alertLoading').style.display = 'block';
         document.getElementById('alertCard').style.display = 'none';
         try {
-            const res = await fetch(`${API_BASE_URL}/api/portfolio-alert`, { headers: getHeaders() });
+            let snapshot = "";
+            for (let item of userPortfolio) {
+                 snapshot += `[${item.symbol}] Cost: $${item.cost_price} | Shares: ${item.shares}\n`;
+            }
+            const res = await safeFetch(`/api/portfolio-alert`, { 
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ portfolio_data: snapshot, language: sysLang })
+            });
             const data = await res.json();
             document.getElementById('alertContent').innerText = data.alert_report;
             document.getElementById('alertCard').style.display = 'block';
@@ -430,7 +422,7 @@
         if(!ticker) return;
         renderChart(ticker, currentInterval);
         try {
-            const res = await fetch(`${API_BASE_URL}/api/stock/${ticker}`, { method: "GET" });
+            const res = await safeFetch(`/api/stock/${ticker}`, { method: "GET" });
             const data = await res.json();
             document.getElementById('stockResult').style.display = 'block';
             document.getElementById('stockResult').innerHTML = `<strong>${data.name || data.symbol}</strong> ($${data.current_price}) | PE: ${data.pe_ratio || 'N/A'}`;
@@ -444,8 +436,8 @@
         document.getElementById('loading').style.display = 'block';
         document.getElementById('aiResult').style.display = 'none';
         try {
-            const res = await fetch(`${API_BASE_URL}/api/ai-analyze`, {
-                method: "POST", headers: getHeaders(),
+            const res = await safeFetch(`/api/ai-analyze`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ticker: ticker, perspective: perspective, language: sysLang }) 
             });
             const data = await res.json();
