@@ -81,16 +81,15 @@
     </select>
 </div>
 
-<!-- 带有密码验证的登录界面 -->
 <div class="auth-container" id="authBox">
-    <h2 id="authTitle" data-i18n="authTitleLogin">系统登录</h2>
+    <h2 id="authTitle" data-i18n="authTitleLogin">云端系统登录</h2>
+    <p style="font-size: 13px; color: #8b949e; margin-bottom: 20px;">已安全连接至 MongoDB 云数据库</p>
     <input type="text" id="authUsername" data-i18n="phUsername" placeholder="请输入专属用户名">
     <input type="password" id="authPassword" data-i18n="phPassword" placeholder="请输入密码">
     <button onclick="handleAuth()" id="authBtn" data-i18n="authBtnLogin">登录系统</button>
-    <div class="auth-toggle" onclick="toggleAuthMode()" id="authToggleText" data-i18n="authToggleToReg">没有账号？点击注册</div>
+    <div class="auth-toggle" onclick="toggleAuthMode()" id="authToggleText" data-i18n="authToggleToReg">首次上云？点击注册新账号</div>
 </div>
 
-<!-- Main Dashboard -->
 <div class="container" id="mainDashboard">
     <div class="top-nav">
         <h1 data-i18n="topTitle">⚡ TACTICAL INVESTMENT TERMINAL</h1>
@@ -100,7 +99,6 @@
                 <option value="zh">中文</option>
                 <option value="en">English</option>
             </select>
-            <!-- 已经修改为保存并退出 -->
             <button class="btn-logout" onclick="logout()" data-i18n="logout">保存并退出</button>
         </div>
     </div>
@@ -137,7 +135,7 @@
                     </tr>
                 </thead>
                 <tbody id="portfolio-body">
-                    <tr><td colspan="9" style="padding: 30px; color: #8b949e;" data-i18n="loadingData">加载中...</td></tr>
+                    <tr><td colspan="9" style="padding: 30px; color: #8b949e;" data-i18n="loadingData">从云端数据库同步中...</td></tr>
                 </tbody>
             </table>
 
@@ -175,6 +173,7 @@
 </div>
 
 <script>
+    // 后端服务器地址
     const API_BASE_URL = "https://investment-management-account2.onrender.com";
     let currentInterval = "D";
     let isLoginMode = true;
@@ -183,25 +182,25 @@
 
     const i18n = {
         zh: {
-            authTitleLogin: "系统登录", authTitleReg: "新用户注册", phUsername: "请输入专属用户名", phPassword: "请输入密码",
-            authBtnLogin: "登录系统", authBtnReg: "立即注册", authToggleToReg: "没有账号？点击注册", authToggleToLogin: "已有账号？返回登录",
+            authTitleLogin: "云端系统登录", authTitleReg: "新用户注册", phUsername: "请输入专属用户名", phPassword: "请输入密码",
+            authBtnLogin: "登录系统", authBtnReg: "立即注册并上云", authToggleToReg: "首次上云？点击注册新账号", authToggleToLogin: "已有云端账号？返回登录",
             topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "当前用户:", logout: "保存并退出",
             statValue: "总净资产", statCost: "总投入成本", statTodayPnl: "今日盈亏", statTotalPnl: "累计收益", statReturn: "综合盈亏比",
             folderTitle: "我的私密投资库", folderReturn: "盈亏比: ", addAssetTitle: "[ + ] 添加资产：", phTicker: "代码 (如 MU)", phCost: "成本价", phShares: "股数", btnSave: "💾 写入资产",
             thAsset: "资产", thCost: "成本", thCurrent: "现价", thShares: "股数", thTotal: "总市值", thHoldPnl: "持仓盈亏", thTodayPnl: "今日盈亏", thReturn: "盈亏比", thAction: "操作",
-            loadingData: "正在向华尔街请求实时数据，请稍候...", noData: "此账号暂无数据，请录入资产", btnEdit: "编辑", btnDelete: "删除",
-            btnAlert: "🤖 呼叫 AI 管家：深度体检与买卖建议", alertLoading: "⏳ [ SYS ] AI 管家正在连接并分析... 免费接口可能需排队，请耐心稍候...", alertTitle: "📊 账户体检与买卖预警",
+            loadingData: "从云端数据库同步中...", noData: "您的云端数据库暂无数据，请添加资产", btnEdit: "编辑", btnDelete: "删除",
+            btnAlert: "🤖 呼叫 AI 管家：深度体检与买卖建议", alertLoading: "⏳ [ SYS ] AI 管家正在连接并分析... 请耐心稍候...", alertTitle: "📊 账户体检与买卖预警",
             chartTitle: "资产走势图表", chartTimeframe: "时间周期:", scanTitle: "个股智能扫描", phScan: "输入股票代码 (如 AAPL)", btnScan: "查询数据",
-            aiDefault: "✨ 综合长线分析", aiFinancial: "📊 财务估值深挖", aiTechnical: "📉 技术动能评估", aiStress: "⚠️ 极度悲观排雷", aiLoading: "⏳ [ SYS ] AI 引擎处理中，免费接口可能需排队，请稍候..."
+            aiDefault: "✨ 综合长线分析", aiFinancial: "📊 财务估值深挖", aiTechnical: "📉 技术动能评估", aiStress: "⚠️ 极度悲观排雷", aiLoading: "⏳ [ SYS ] AI 引擎处理中，请稍候..."
         },
         en: {
-            authTitleLogin: "System Login", authTitleReg: "User Registration", phUsername: "Enter Username", phPassword: "Enter Password",
-            authBtnLogin: "Login", authBtnReg: "Register", authToggleToReg: "No account? Register here", authToggleToLogin: "Have an account? Login",
+            authTitleLogin: "Cloud Login", authTitleReg: "Register Cloud Account", phUsername: "Enter Username", phPassword: "Enter Password",
+            authBtnLogin: "Login", authBtnReg: "Register & Sync", authToggleToReg: "New here? Register", authToggleToLogin: "Have an account? Login",
             topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "User:", logout: "Save & Exit",
             statValue: "Total Value", statCost: "Total Cost", statTodayPnl: "Today's P&L", statTotalPnl: "Total P&L", statReturn: "Return %",
             folderTitle: "My Private Portfolio", folderReturn: "Return: ", addAssetTitle: "[ + ] Add Asset:", phTicker: "Ticker (e.g. MU)", phCost: "Cost", phShares: "Shares", btnSave: "💾 Save Asset",
             thAsset: "Asset", thCost: "Cost", thCurrent: "Current", thShares: "Shares", thTotal: "Total Value", thHoldPnl: "Hold P&L", thTodayPnl: "Today P&L", thReturn: "Return", thAction: "Action",
-            loadingData: "Fetching live data from Wall Street...", noData: "No data found. Please add assets.", btnEdit: "Edit", btnDelete: "Delete",
+            loadingData: "Syncing from cloud database...", noData: "No data in cloud DB. Please add assets.", btnEdit: "Edit", btnDelete: "Delete",
             btnAlert: "🤖 Call AI Manager: Portfolio Health Check", alertLoading: "⏳ [ SYS ] AI Manager analyzing... Please wait...", alertTitle: "📊 Portfolio Health & Trade Alerts",
             chartTitle: "Performance Chart", chartTimeframe: "Timeframe:", scanTitle: "Smart Asset Scanner", phScan: "Enter Ticker (e.g. AAPL)", btnScan: "Search Data",
             aiDefault: "✨ General Long-term", aiFinancial: "📊 Financial Deep-Dive", aiTechnical: "📉 Technical Momentum", aiStress: "⚠️ Extreme Stress Test", aiLoading: "⏳ [ SYS ] AI engine processing..."
@@ -251,44 +250,40 @@
         document.getElementById("authToggleText").innerText = i18n[sysLang][isLoginMode ? "authToggleToReg" : "authToggleToLogin"];
     }
 
-    // 独立安全保险箱逻辑
-    function handleAuth() {
+    // 💡 真正连接云端 MongoDB 的注册/登录逻辑
+    async function handleAuth() {
         const u = document.getElementById("authUsername").value.trim();
         const p = document.getElementById("authPassword").value.trim();
-        if(!u || !p) return alert(sysLang === 'en' ? "Username and Password cannot be empty!" : "⚠️ 用户名和密码不能为空！");
+        if(!u || !p) return alert("⚠️ 账号和密码不能为空！");
         
-        let db = JSON.parse(localStorage.getItem("terminal_secure_db")) || {};
-
-        if (!isLoginMode) {
-            if (db[u]) return alert(sysLang === 'en' ? "Account exists. Please login." : "⚠️ 该用户名已存在，请直接登录！");
-            db[u] = { password: p, portfolio: [] };
-            localStorage.setItem("terminal_secure_db", JSON.stringify(db));
-            alert(sysLang === 'en' ? "Registration successful!" : "🎉 注册成功！请切换到登录界面进行登录。");
-            toggleAuthMode(true);
-        } else {
-            if (!db[u] || db[u].password !== p) return alert(sysLang === 'en' ? "Invalid credentials!" : "❌ 用户名或密码错误！");
-            localStorage.setItem("terminal_current_user", u);
-            window.location.reload();
+        const endpoint = isLoginMode ? "/api/login" : "/api/register";
+        
+        try {
+            const res = await fetch(API_BASE_URL + endpoint, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail || "请求失败");
+            }
+            
+            if (!isLoginMode) {
+                alert("🎉 注册成功！您的账号已永久保存在云端数据库，请直接登录。");
+                toggleAuthMode(true);
+            } else {
+                localStorage.setItem("terminal_current_user", u);
+                window.location.reload();
+            }
+        } catch(e) { 
+            alert("❌ 操作失败: " + e.message); 
         }
     }
 
-    // 保存并退出（绝不删除用户的 portfolio 数据）
     function logout() {
-        localStorage.removeItem("terminal_current_user"); // 只清除当前的登录状态
+        localStorage.removeItem("terminal_current_user"); // 退出只清空登录状态标记，云端数据永久存在
         window.location.reload();
-    }
-
-    function getUserPortfolio() {
-        if(!currentUser) return [];
-        let db = JSON.parse(localStorage.getItem("terminal_secure_db")) || {};
-        return db[currentUser] ? db[currentUser].portfolio : [];
-    }
-
-    function saveUserPortfolio(newPortfolio) {
-        if(!currentUser) return;
-        let db = JSON.parse(localStorage.getItem("terminal_secure_db")) || {};
-        db[currentUser].portfolio = newPortfolio;
-        localStorage.setItem("terminal_secure_db", JSON.stringify(db));
     }
 
     async function safeFetch(endpoint, options) {
@@ -297,11 +292,22 @@
         return res;
     }
 
+    // 💡 从 MongoDB 读取持仓数据
     async function loadDashboard() {
-        let portfolio = getUserPortfolio();
-        let totalVal = 0, totalCost = 0, grandTodayPnl = 0;
         const tbody = document.getElementById('portfolio-body');
-        tbody.innerHTML = ""; 
+        tbody.innerHTML = `<tr><td colspan="9" style="padding: 30px; color: #8b949e;">${i18n[sysLang]["loadingData"]}</td></tr>`;
+        
+        let portfolio = [];
+        try {
+            const res = await fetch(API_BASE_URL + "/api/portfolio", { headers: { "x-user-id": currentUser } });
+            if(res.ok) {
+                const data = await res.json();
+                portfolio = data.portfolio || [];
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="9" style="padding: 30px; color: #da3633;">❌ 无法连接到云端数据库，请检查网络</td></tr>`;
+            return;
+        }
 
         if(portfolio.length === 0) {
             document.getElementById('globalValue').innerText = "$0.00";
@@ -313,12 +319,13 @@
             return;
         }
 
-        tbody.innerHTML = `<tr><td colspan="9" style="padding: 30px; color: #8b949e;">${i18n[sysLang]["loadingData"]}</td></tr>`;
+        let totalVal = 0, totalCost = 0, grandTodayPnl = 0;
         let htmlRows = "";
 
         for (let item of portfolio) {
             try {
-                const res = await safeFetch(`/api/stock/${item.symbol}`, { method: "GET" });
+                const res = await fetch(API_BASE_URL + `/api/stock/${item.symbol}`);
+                if (!res.ok) throw new Error("获取价格失败");
                 const s_data = await res.json();
                 
                 const curPrice = s_data.current_price;
@@ -354,12 +361,10 @@
                     </tr>
                 `;
             } catch (e) {
-                // 防 NaN 机制
                 const totCost = item.cost_price * item.shares;
                 totalCost += totCost; 
                 totalVal += totCost; 
-                
-                let errorMsg = sysLang === 'en' ? "⚠️ API Limited (Too Many Requests). Check back later." : "⚠️ 接口受限 (Too Many Requests)，请稍后重试。";
+                let errorMsg = sysLang === 'en' ? "⚠️ API Limited. Showing cost basis." : "⚠️ 获取现价失败，已暂时锁定为成本价。";
                 
                 htmlRows += `
                     <tr>
@@ -410,59 +415,37 @@
         document.getElementById('addShares').value = shares;
     }
 
-    function saveStock() {
+    // 💡 保存资产到云端数据库
+    async function saveStock() {
         const symbol = document.getElementById('addTicker').value.trim().toUpperCase();
-        const cost_price = parseFloat(document.getElementById('addCost').value);
+        const cost = parseFloat(document.getElementById('addCost').value);
         const shares = parseFloat(document.getElementById('addShares').value);
-        if(!symbol || isNaN(cost_price) || isNaN(shares)) return alert("⚠️ 请完整填写正确的数字！");
+        if(!symbol || isNaN(cost) || isNaN(shares)) return alert("⚠️ 请完整填写数字！");
 
-        let portfolio = getUserPortfolio();
-        let existing = portfolio.find(i => i.symbol === symbol);
-        if(existing) {
-            existing.cost_price = cost_price;
-            existing.shares = shares;
-        } else {
-            portfolio.push({symbol, cost_price, shares});
-        }
-        
-        saveUserPortfolio(portfolio);
-        
-        document.getElementById('addTicker').value = "";
-        document.getElementById('addCost').value = "";
-        document.getElementById('addShares').value = "";
-        loadDashboard();
-    }
-
-    function deleteStock(symbol) {
-        if(!confirm(`Delete / 确认删除 ${symbol} 吗?`)) return;
-        let portfolio = getUserPortfolio();
-        portfolio = portfolio.filter(i => i.symbol !== symbol);
-        saveUserPortfolio(portfolio);
-        loadDashboard();
-    }
-
-    async function checkPortfolioAlert() {
-        let portfolio = getUserPortfolio();
-        if (portfolio.length === 0) return;
-        document.getElementById('alertLoading').style.display = 'block';
-        document.getElementById('alertCard').style.display = 'none';
         try {
-            let snapshot = "";
-            for (let item of portfolio) {
-                 snapshot += `[${item.symbol}] Cost: $${item.cost_price} | Shares: ${item.shares}\n`;
-            }
-            const res = await safeFetch(`/api/portfolio-alert`, { 
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ portfolio_data: snapshot, language: sysLang })
+            const res = await fetch(API_BASE_URL + "/api/portfolio", {
+                method: "POST", headers: { "Content-Type": "application/json", "x-user-id": currentUser },
+                body: JSON.stringify({ symbol: symbol, cost_price: cost, shares: shares })
             });
-            const data = await res.json();
-            document.getElementById('alertContent').innerText = data.alert_report;
-            document.getElementById('alertCard').style.display = 'block';
-        } catch(e) {
-            document.getElementById('alertContent').innerText = "⚠️ 接口受限 (Too Many Requests)，请稍后再试。";
-            document.getElementById('alertCard').style.display = 'block';
-        } 
-        finally { document.getElementById('alertLoading').style.display = 'none'; }
+            if(res.ok) {
+                document.getElementById('addTicker').value = "";
+                document.getElementById('addCost').value = "";
+                document.getElementById('addShares').value = "";
+                loadDashboard(); // 重新从云端加载
+            } else { alert("❌ 保存到云端失败"); }
+        } catch(e) { alert("❌ 网络错误"); }
+    }
+
+    // 💡 从云端数据库删除资产
+    async function deleteStock(symbol) {
+        if(!confirm(`确认删除 ${symbol} 吗?`)) return;
+        try {
+            const res = await fetch(API_BASE_URL + `/api/portfolio/${symbol}`, {
+                method: "DELETE", headers: { "x-user-id": currentUser }
+            });
+            if(res.ok) loadDashboard();
+            else alert("❌ 删除失败");
+        } catch(e) { alert("❌ 网络错误"); }
     }
 
     function renderChart(ticker, interval) {
@@ -489,14 +472,41 @@
         if(!ticker) return;
         renderChart(ticker, currentInterval);
         try {
-            const res = await safeFetch(`/api/stock/${ticker}`, { method: "GET" });
+            const res = await fetch(API_BASE_URL + `/api/stock/${ticker}`);
+            if(!res.ok) throw new Error();
             const data = await res.json();
             document.getElementById('stockResult').style.display = 'block';
             document.getElementById('stockResult').innerHTML = `<strong>${data.name || data.symbol}</strong> ($${data.current_price}) | PE: ${data.pe_ratio || 'N/A'}`;
         } catch(e) {
             document.getElementById('stockResult').style.display = 'block';
-            document.getElementById('stockResult').innerHTML = `<span style="color:#d29922;">⚠️ 请求被限流 (Too Many Requests)，请稍后再试。</span>`;
+            document.getElementById('stockResult').innerHTML = `<span style="color:#da3633;">❌ 获取数据失败，可能代码输入有误。</span>`;
         }
+    }
+
+    async function checkPortfolioAlert() {
+        document.getElementById('alertLoading').style.display = 'block';
+        document.getElementById('alertCard').style.display = 'none';
+        try {
+            // 先从云端获取最新持仓
+            const getRes = await fetch(API_BASE_URL + "/api/portfolio", { headers: { "x-user-id": currentUser } });
+            const pData = await getRes.json();
+            let snapshot = "";
+            (pData.portfolio || []).forEach(item => { snapshot += `[${item.symbol}] Cost: $${item.cost_price} | Shares: ${item.shares}\n`; });
+            
+            if (!snapshot) throw new Error("无持仓数据");
+
+            const res = await fetch(API_BASE_URL + `/api/portfolio-alert`, { 
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ portfolio_data: snapshot, language: sysLang })
+            });
+            const data = await res.json();
+            document.getElementById('alertContent').innerText = data.alert_report;
+            document.getElementById('alertCard').style.display = 'block';
+        } catch(e) {
+            document.getElementById('alertContent').innerText = "⚠️ 系统繁忙或无持仓数据，请稍后重试。";
+            document.getElementById('alertCard').style.display = 'block';
+        } 
+        finally { document.getElementById('alertLoading').style.display = 'none'; }
     }
 
     async function analyzeStock(perspective) {
@@ -506,7 +516,7 @@
         document.getElementById('loading').style.display = 'block';
         document.getElementById('aiResult').style.display = 'none';
         try {
-            const res = await safeFetch(`/api/ai-analyze`, {
+            const res = await fetch(API_BASE_URL + `/api/ai-analyze`, {
                 method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ticker: ticker, perspective: perspective, language: sysLang }) 
             });
@@ -514,7 +524,7 @@
             document.getElementById('aiResult').innerText = data.ai_analysis;
             document.getElementById('aiResult').style.display = 'block';
         } catch(e) {
-            document.getElementById('aiResult').innerText = "⚠️ 请求受限，请稍后再试。";
+            document.getElementById('aiResult').innerText = "⚠️ AI 引擎处理失败，请稍后重试。";
             document.getElementById('aiResult').style.display = 'block';
         } 
         finally { document.getElementById('loading').style.display = 'none'; }
