@@ -53,6 +53,10 @@ class AnalyzeRequest(BaseModel):
     perspective: str = "default"
     language: str = "zh"
 
+class AnalyzeResponse(BaseModel):
+    ticker: str
+    ai_analysis: str
+
 class AlertRequest(BaseModel):
     portfolio_data: str
     language: str = "zh"
