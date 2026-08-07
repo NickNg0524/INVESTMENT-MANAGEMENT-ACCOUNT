@@ -1,14 +1,14 @@
 import os
 import time
+import urllib.request
+import json
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict
-import yfinance as yf
-import requests
 from openai import OpenAI
 
-app = FastAPI(title="Pro Investment Terminal V9 - Anti-Block", version="9.0.0")
+app = FastAPI(title="Pro Investment Terminal V11 - Anti-Block", version="11.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,15 +21,6 @@ app.add_middleware(
 YOUR_OPENROUTER_API_KEY = "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"
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=YOUR_OPENROUTER_API_KEY)
 
-# 💡 破解限流法宝 1：伪装成人类真实浏览器
-session = requests.Session()
-session.headers.update({
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5"
-})
-
-# 💡 破解限流法宝 2：建立数据缓存（同一只股票 60 秒内不再重复打扰 Yahoo）
 PRICE_CACHE = {}
 CACHE_EXPIRY = 60 
 
@@ -52,45 +43,45 @@ FREE_MODELS_POOL = [
     "google/gemini-2.0-flash-exp:free"
 ]
 
+# 核心破解逻辑：直接伪装请求避开 yfinance 封锁
 def fetch_stock_internal(ticker: str) -> dict:
     symbol_str = ticker.upper()
     current_time = time.time()
     
-    # 如果缓存里有，且还没过期，直接极速返回！
     if symbol_str in PRICE_CACHE and (current_time - PRICE_CACHE[symbol_str]['timestamp']) < CACHE_EXPIRY:
         return PRICE_CACHE[symbol_str]['data']
 
     try:
-        # 使用带有浏览器伪装的 session
-        stock = yf.Ticker(symbol_str, session=session)
-        info = stock.info
+        url = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol_str}"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'})
         
-        current_price = info.get("currentPrice") or info.get("regularMarketPrice") or info.get("navPrice")
-        if current_price is None: 
-            # 备用极速抓取通道
-            current_price = stock.fast_info.get("last_price")
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode())
             
+        result_data = data['chart']['result'][0]['meta']
+        
+        current_price = result_data.get('regularMarketPrice')
+        prev_close = result_data.get('chartPreviousClose')
+        
         if current_price is None:
-            raise ValueError(f"Target '{symbol_str}' not found.")
+            raise ValueError("Price not found")
             
-        prev_close = info.get("previousClose") or info.get("regularMarketPreviousClose")
         change_pct = round(((current_price - prev_close) / prev_close) * 100, 2) if current_price and prev_close else 0.0
         
         result = {
             "symbol": symbol_str,
-            "name": info.get("longName") or info.get("shortName") or symbol_str,
+            "name": symbol_str, 
             "current_price": current_price,
             "previous_close": prev_close,
             "change_percent": change_pct,
-            "currency": info.get("currency", "USD"),
-            "pe_ratio": info.get("trailingPE", "N/A")
+            "currency": result_data.get("currency", "USD"),
+            "pe_ratio": "N/A"
         }
         
-        # 存入缓存
         PRICE_CACHE[symbol_str] = {'timestamp': current_time, 'data': result}
         return result
     except Exception as e:
-        raise ValueError(f"Fetch failed: {str(e)}")
+        raise ValueError(f"Fetch blocked: {str(e)}")
 
 @app.get("/api/stock/{ticker}")
 def get_stock_data(ticker: str):
@@ -109,7 +100,7 @@ def portfolio_alert(req: AlertRequest):
             break
         except Exception as e: last_error = str(e); continue 
 
-    return {"alert_report": report or f"⚠️ AI Request Limit Reached. AI 线路拥堵，请稍后重试。"}
+    return {"alert_report": report or f"⚠️ AI Request Limit Reached."}
 
 @app.post("/api/ai-analyze", response_model=AnalyzeResponse)
 def analyze_stock(request: AnalyzeRequest):
@@ -132,6 +123,6 @@ def analyze_stock(request: AnalyzeRequest):
                 break 
             except Exception as e: last_error = str(e); continue
         
-        return AnalyzeResponse(ticker=request.ticker.upper(), ai_analysis=analysis_result or f"⚠️ AI Request Limit Reached. 免费 AI 通道排队中，请稍后再试。")
+        return AnalyzeResponse(ticker=request.ticker.upper(), ai_analysis=analysis_result or f"⚠️ AI Request Limit Reached.")
     except Exception as e:
-         return AnalyzeResponse(ticker=request.ticker.upper(), ai_analysis=f"⚠️ 请求限制 (Too Many Requests): 已被 Yahoo 财经防火墙暂时拦截，请休息几分钟后再试。")
+         return AnalyzeResponse(ticker=request.ticker.upper(), ai_analysis=f"⚠️ 请求限制 (Too Many Requests): 被拦截，请稍后再试。")

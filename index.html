@@ -7,61 +7,69 @@
     <script type="text/javascript" src="https://s.tradingview.com/tv.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
-        .container { max-width: 1150px; margin: auto; background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #30363d; display: none; }
+        .container { max-width: 1200px; margin: auto; background: #161b22; padding: 30px; border-radius: 12px; box-shadow: 0 12px 28px rgba(0,0,0,0.6); border: 1px solid #30363d; display: none; }
         
-        .auth-container { max-width: 400px; margin: 100px auto; background: #161b22; padding: 40px; border-radius: 12px; border: 1px solid #30363d; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
-        .auth-container h2 { color: #58a6ff; margin-top: 0; }
-        .auth-container input { width: 90%; padding: 12px; margin: 10px 0; background: #0d1117; color: white; border: 1px solid #30363d; border-radius: 6px; }
-        .auth-container button { width: 95%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background: #238636; color: white; transition: 0.2s; }
+        .auth-container { max-width: 420px; margin: 120px auto; background: #161b22; padding: 40px; border-radius: 12px; border: 1px solid #30363d; text-align: center; box-shadow: 0 12px 28px rgba(0,0,0,0.8); }
+        .auth-container h2 { color: #58a6ff; margin-top: 0; font-size: 24px; }
+        .auth-container input { width: 90%; padding: 14px; margin: 10px 0; background: #0d1117; color: white; border: 1px solid #30363d; border-radius: 6px; font-size: 14px;}
+        .auth-container button { width: 95%; padding: 14px; margin-top: 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background: #238636; color: white; font-size: 16px; transition: 0.2s; }
         .auth-container button:hover { background: #2ea043; }
+        .auth-toggle { margin-top: 20px; font-size: 13px; color: #8b949e; cursor: pointer; transition: 0.2s;}
+        .auth-toggle:hover { color: #58a6ff; }
         
         .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #30363d; padding-bottom: 15px; margin-bottom: 25px; }
-        .top-nav h1 { color: #58a6ff; margin: 0; text-shadow: 0 0 10px rgba(88, 166, 255, 0.3); font-size: 22px; }
+        .top-nav h1 { color: #58a6ff; margin: 0; text-shadow: 0 0 10px rgba(88, 166, 255, 0.3); font-size: 22px; display: flex; align-items: center; gap: 10px;}
         .nav-controls { display: flex; gap: 15px; align-items: center; }
-        .lang-select { background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; padding: 6px; border-radius: 4px; outline: none; cursor: pointer; }
-        .btn-logout { background: transparent; border: 1px solid #da3633; color: #da3633; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .lang-select { background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 6px; outline: none; cursor: pointer; }
+        .btn-logout { background: transparent; border: 1px solid #da3633; color: #da3633; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;}
         .btn-logout:hover { background: #da3633; color: white; }
 
-        .global-stats { display: flex; gap: 12px; margin-bottom: 25px; }
-        .stat-card { flex: 1; background: #21262d; padding: 12px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
-        .stat-card h3 { margin: 0 0 6px 0; color: #8b949e; font-size: 12px; }
-        .stat-card .val { font-size: 18px; font-weight: bold; color: #f0f6fc; }
+        .global-stats { display: flex; gap: 15px; margin-bottom: 30px; }
+        .stat-card { flex: 1; background: #21262d; padding: 20px 15px; border-radius: 8px; border: 1px solid #30363d; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);}
+        .stat-card h3 { margin: 0 0 10px 0; color: #8b949e; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;}
+        .stat-card .val { font-size: 22px; font-weight: bold; color: #f0f6fc; }
 
-        .account-folder { background: #0d1117; margin-bottom: 25px; border-radius: 8px; border: 1px solid #30363d; overflow: hidden; }
-        .folder-header { background: #21262d; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #d2a8ff; }
-        .folder-body { padding: 20px; }
-        .add-box { background: #161b22; padding: 12px; border-radius: 6px; display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
-        .add-box input { background: #0d1117; color: white; border: 1px solid #30363d; padding: 8px; border-radius: 4px; }
+        .account-folder { background: #0d1117; margin-bottom: 30px; border-radius: 8px; border: 1px solid #30363d; overflow: hidden; }
+        .folder-header { background: #21262d; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #d2a8ff; font-size: 16px;}
+        .folder-body { padding: 25px; }
+        .add-box { background: #161b22; padding: 15px; border-radius: 8px; display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; border: 1px solid #30363d;}
+        .add-box input { background: #0d1117; color: white; border: 1px solid #30363d; padding: 10px; border-radius: 6px; }
         
-        .portfolio-table { width: 100%; border-collapse: collapse; }
-        .portfolio-table th, .portfolio-table td { padding: 12px; text-align: center; border-bottom: 1px solid #30363d; font-size: 13px; }
-        .portfolio-table th { background-color: #21262d; color: #8b949e; }
+        .portfolio-table { width: 100%; border-collapse: collapse; margin-bottom: 20px;}
+        .portfolio-table th, .portfolio-table td { padding: 15px; text-align: center; border-bottom: 1px solid #30363d; font-size: 14px; }
+        .portfolio-table th { background-color: #21262d; color: #8b949e; font-weight: 600; text-transform: uppercase;}
+        .portfolio-table tr:hover { background-color: #161b22; }
+        
         .profit { color: #3fb950; font-weight: bold; text-shadow: 0 0 8px rgba(63, 185, 80, 0.4); }
         .loss { color: #f85149; font-weight: bold; text-shadow: 0 0 8px rgba(248, 81, 73, 0.4); }
+        .neutral { color: #8b949e; font-weight: bold; }
 
-        .btn-save { background-color: #238636; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold;}
-        .btn-edit { background: transparent; border: 1px solid #58a6ff; color: #58a6ff; padding: 4px 8px; font-size: 12px; margin-right: 5px; cursor: pointer; border-radius: 4px;}
-        .btn-delete { background: transparent; border: 1px solid #da3633; color: #da3633; padding: 4px 8px; font-size: 12px; cursor: pointer; border-radius: 4px;}
+        .btn-save { background-color: #238636; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        .btn-edit { background: transparent; border: 1px solid #58a6ff; color: #58a6ff; padding: 6px 12px; font-size: 12px; margin-right: 5px; cursor: pointer; border-radius: 4px; transition: 0.2s;}
+        .btn-edit:hover { background: #58a6ff; color: #0d1117; }
+        .btn-delete { background: transparent; border: 1px solid #da3633; color: #da3633; padding: 6px 12px; font-size: 12px; cursor: pointer; border-radius: 4px; transition: 0.2s;}
+        .btn-delete:hover { background: #da3633; color: white; }
         
-        .btn-alert { background-color: #d29922; color: #0d1117; width: 100%; padding: 14px; margin-top: 20px; font-size: 15px; border: none; cursor: pointer; font-weight: bold; border-radius: 6px;}
-        .alert-card { background: #1a160c; border: 1px solid #d29922; border-left: 5px solid #d29922; padding: 20px; border-radius: 8px; margin-top: 15px; display: none; line-height: 1.7; white-space: pre-wrap; font-size: 15px;}
+        .btn-alert { background-color: #d29922; color: #0d1117; width: 100%; padding: 16px; margin-top: 10px; font-size: 16px; border: none; cursor: pointer; font-weight: bold; border-radius: 8px; transition: 0.2s;}
+        .btn-alert:hover { background-color: #e3a92b; }
+        .alert-card { background: #1a160c; border: 1px solid #d29922; border-left: 5px solid #d29922; padding: 25px; border-radius: 8px; margin-top: 20px; display: none; line-height: 1.8; white-space: pre-wrap; font-size: 15px;}
 
-        .chart-controls { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .time-btn { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .chart-controls { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        .time-btn { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;}
         .time-btn.active { background: #1f6feb; color: white; border-color: #1f6feb; }
-        .chart-container { height: 420px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 25px; }
+        .chart-container { height: 450px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 30px; overflow: hidden;}
 
-        .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
-        .search-input { flex: 1; padding: 10px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; }
+        .search-box { display: flex; gap: 15px; margin-bottom: 20px; }
+        .search-input { flex: 1; padding: 14px; background-color: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #c9d1d9; font-size: 15px;}
         
-        .ai-buttons-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .btn-ai { flex: 1; color: white; padding: 12px 10px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;}
+        .ai-buttons-container { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn-ai { flex: 1; color: white; padding: 14px 12px; font-size: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; min-width: 150px;}
         .btn-default { background-color: #238636; } .btn-financial { background-color: #316dca; } 
         .btn-technical { background-color: #8957e5; } .btn-stress { background-color: #da3633; }
         
-        .result-card, .ai-card { background: #0d1117; padding: 15px; border-radius: 6px; display: none; margin-bottom: 15px; border-left: 4px solid #58a6ff; line-height: 1.6; }
+        .result-card, .ai-card { background: #0d1117; padding: 20px; border-radius: 8px; display: none; margin-bottom: 20px; border-left: 5px solid #58a6ff; line-height: 1.7; font-size: 15px;}
         .ai-card { border-left-color: #238636; white-space: pre-wrap; }
-        .loading { text-align: center; color: #8b949e; display: none; margin-bottom: 15px; }
+        .loading { text-align: center; color: #8b949e; display: none; margin-bottom: 20px; padding: 20px; background: #161b22; border-radius: 8px; border: 1px dashed #30363d;}
     </style>
 </head>
 <body>
@@ -73,12 +81,13 @@
     </select>
 </div>
 
-<!-- Login UI -->
+<!-- 带有密码验证的登录界面 -->
 <div class="auth-container" id="authBox">
-    <h2 id="authTitle" data-i18n="authTitleLogin">系统安全验证</h2>
-    <p style="font-size: 13px; color: #8b949e; margin-bottom: 20px;">*采用 Local-First 架构，数据100%保存在本地浏览器</p>
-    <input type="text" id="authUsername" data-i18n="phUsername" placeholder="请输入专属用户名 (首次输入即自动注册)">
-    <button onclick="handleAuth()" id="authBtn" data-i18n="authBtnLogin">开启终端</button>
+    <h2 id="authTitle" data-i18n="authTitleLogin">系统登录</h2>
+    <input type="text" id="authUsername" data-i18n="phUsername" placeholder="请输入专属用户名">
+    <input type="password" id="authPassword" data-i18n="phPassword" placeholder="请输入密码">
+    <button onclick="handleAuth()" id="authBtn" data-i18n="authBtnLogin">登录系统</button>
+    <div class="auth-toggle" onclick="toggleAuthMode()" id="authToggleText" data-i18n="authToggleToReg">没有账号？点击注册</div>
 </div>
 
 <!-- Main Dashboard -->
@@ -91,7 +100,8 @@
                 <option value="zh">中文</option>
                 <option value="en">English</option>
             </select>
-            <button class="btn-logout" onclick="logout()" data-i18n="logout">清空缓存并退出</button>
+            <!-- 已经修改为保存并退出 -->
+            <button class="btn-logout" onclick="logout()" data-i18n="logout">保存并退出</button>
         </div>
     </div>
 
@@ -110,10 +120,10 @@
         </div>
         <div class="folder-body">
             <div class="add-box">
-                <span style="font-size:12px; color:#8b949e;" id="formTitle" data-i18n="addAssetTitle">[ + ] 添加资产：</span>
-                <input type="text" id="addTicker" data-i18n="phTicker" placeholder="Ticker" style="width: 80px; text-transform: uppercase;">
-                <input type="number" id="addCost" step="any" data-i18n="phCost" placeholder="成本价" style="width: 100px;">
-                <input type="number" id="addShares" step="any" data-i18n="phShares" placeholder="股数" style="width: 90px;">
+                <span style="font-size:13px; color:#8b949e; font-weight:bold;" id="formTitle" data-i18n="addAssetTitle">[ + ] 添加资产：</span>
+                <input type="text" id="addTicker" data-i18n="phTicker" placeholder="Ticker" style="width: 90px; text-transform: uppercase;">
+                <input type="number" id="addCost" step="any" data-i18n="phCost" placeholder="成本价" style="width: 110px;">
+                <input type="number" id="addShares" step="any" data-i18n="phShares" placeholder="股数" style="width: 100px;">
                 <button class="btn-save" onclick="saveStock()" data-i18n="btnSave">💾 写入资产</button>
             </div>
             <table class="portfolio-table">
@@ -127,31 +137,31 @@
                     </tr>
                 </thead>
                 <tbody id="portfolio-body">
-                    <tr><td colspan="9" style="color: #8b949e;" data-i18n="loadingData">加载中...</td></tr>
+                    <tr><td colspan="9" style="padding: 30px; color: #8b949e;" data-i18n="loadingData">加载中...</td></tr>
                 </tbody>
             </table>
 
             <button class="btn-alert" onclick="checkPortfolioAlert()" data-i18n="btnAlert">🤖 呼叫 AI 管家：深度体检与买卖建议</button>
-            <div id="alertLoading" class="loading" style="margin-top: 15px;" data-i18n="alertLoading">[ SYS ] AI 管家正在连接并分析... 请稍候...</div>
-            <div id="alertCard" class="alert-card"><h3 style="color: #d29922; margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 8px;" data-i18n="alertTitle">📊 账户体检与买卖预警</h3><div id="alertContent"></div></div>
+            <div id="alertLoading" class="loading" data-i18n="alertLoading">⏳ [ SYS ] AI 管家正在连接并分析... 免费接口可能需排队，请耐心稍候...</div>
+            <div id="alertCard" class="alert-card"><h3 style="color: #d29922; margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 10px;" data-i18n="alertTitle">📊 账户体检与买卖预警</h3><div id="alertContent"></div></div>
         </div>
     </div>
 
-    <hr style="border: 1px solid #30363d; margin: 30px 0;">
+    <hr style="border: 1px solid #30363d; margin: 40px 0;">
     <h2><span style="color: #58a6ff;">■</span> <span data-i18n="chartTitle">资产走势图表</span></h2>
     <div class="chart-controls">
-        <span style="color: #8b949e; font-size: 14px;" data-i18n="chartTimeframe">时间周期:</span>
+        <span style="color: #8b949e; font-size: 14px; font-weight:bold;" data-i18n="chartTimeframe">时间周期:</span>
         <button class="time-btn" onclick="changeInterval('W', this)">WEEK</button>
         <button class="time-btn active" onclick="changeInterval('D', this)">MONTH / DAILY</button>
         <button class="time-btn" onclick="changeInterval('M', this)">QUARTER / YEAR</button>
     </div>
     <div id="tvchart_container" class="chart-container"></div>
 
-    <hr style="border: 1px solid #30363d; margin: 30px 0;">
+    <hr style="border: 1px solid #30363d; margin: 40px 0;">
     <h2><span style="color: #58a6ff;">■</span> <span data-i18n="scanTitle">个股智能扫描</span></h2>
     <div class="search-box">
         <input type="text" id="tickerInput" class="search-input" data-i18n="phScan" placeholder="输入股票代码 (如 AAPL)" value="AAPL">
-        <button class="btn-save" onclick="fetchStock()" data-i18n="btnScan">查询数据</button>
+        <button class="btn-save" onclick="fetchStock()" style="padding: 0 25px; font-size: 15px;" data-i18n="btnScan">查询数据</button>
     </div>
     <div class="ai-buttons-container">
         <button class="btn-ai btn-default" onclick="analyzeStock('default')" data-i18n="aiDefault">✨ 综合长线分析</button>
@@ -159,44 +169,42 @@
         <button class="btn-ai btn-technical" onclick="analyzeStock('technical')" data-i18n="aiTechnical">📉 技术动能评估</button>
         <button class="btn-ai btn-stress" onclick="analyzeStock('stress')" data-i18n="aiStress">⚠️ 极度悲观排雷</button>
     </div>
-    <div id="loading" class="loading" data-i18n="aiLoading">[ SYS ] AI engine processing...</div>
+    <div id="loading" class="loading" data-i18n="aiLoading">⏳ [ SYS ] AI 引擎处理中，请稍候...</div>
     <div id="stockResult" class="result-card"></div>
     <div id="aiResult" class="ai-card"></div>
 </div>
 
 <script>
-    // 💡 这里已经配好了你的 Account2 线上地址！
     const API_BASE_URL = "https://investment-management-account2.onrender.com";
     let currentInterval = "D";
+    let isLoginMode = true;
     let sysLang = localStorage.getItem("terminal_lang") || "zh";
-    
-    // 💡 全新的本地持仓存储库
-    let userPortfolio = JSON.parse(localStorage.getItem("terminal_portfolio")) || [];
+    let currentUser = localStorage.getItem("terminal_current_user");
 
     const i18n = {
         zh: {
-            authTitleLogin: "系统安全验证", phUsername: "请输入专属用户名 (首次输入自动保存)",
-            authBtnLogin: "开启终端",
-            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "当前用户:", logout: "清空缓存并退出",
+            authTitleLogin: "系统登录", authTitleReg: "新用户注册", phUsername: "请输入专属用户名", phPassword: "请输入密码",
+            authBtnLogin: "登录系统", authBtnReg: "立即注册", authToggleToReg: "没有账号？点击注册", authToggleToLogin: "已有账号？返回登录",
+            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "当前用户:", logout: "保存并退出",
             statValue: "总净资产", statCost: "总投入成本", statTodayPnl: "今日盈亏", statTotalPnl: "累计收益", statReturn: "综合盈亏比",
             folderTitle: "我的私密投资库", folderReturn: "盈亏比: ", addAssetTitle: "[ + ] 添加资产：", phTicker: "代码 (如 MU)", phCost: "成本价", phShares: "股数", btnSave: "💾 写入资产",
             thAsset: "资产", thCost: "成本", thCurrent: "现价", thShares: "股数", thTotal: "总市值", thHoldPnl: "持仓盈亏", thTodayPnl: "今日盈亏", thReturn: "盈亏比", thAction: "操作",
             loadingData: "正在向华尔街请求实时数据，请稍候...", noData: "此账号暂无数据，请录入资产", btnEdit: "编辑", btnDelete: "删除",
-            btnAlert: "🤖 呼叫 AI 管家：深度体检与买卖建议", alertLoading: "[ SYS ] AI 管家正在连接并分析... 请稍候...", alertTitle: "📊 账户体检与买卖预警",
+            btnAlert: "🤖 呼叫 AI 管家：深度体检与买卖建议", alertLoading: "⏳ [ SYS ] AI 管家正在连接并分析... 免费接口可能需排队，请耐心稍候...", alertTitle: "📊 账户体检与买卖预警",
             chartTitle: "资产走势图表", chartTimeframe: "时间周期:", scanTitle: "个股智能扫描", phScan: "输入股票代码 (如 AAPL)", btnScan: "查询数据",
-            aiDefault: "✨ 综合长线分析", aiFinancial: "📊 财务估值深挖", aiTechnical: "📉 技术动能评估", aiStress: "⚠️ 极度悲观排雷", aiLoading: "[ SYS ] AI 引擎处理中..."
+            aiDefault: "✨ 综合长线分析", aiFinancial: "📊 财务估值深挖", aiTechnical: "📉 技术动能评估", aiStress: "⚠️ 极度悲观排雷", aiLoading: "⏳ [ SYS ] AI 引擎处理中，免费接口可能需排队，请稍候..."
         },
         en: {
-            authTitleLogin: "Security Gateway", phUsername: "Enter Username (Saves locally)",
-            authBtnLogin: "Enter Terminal",
-            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "User:", logout: "Clear Data & Exit",
+            authTitleLogin: "System Login", authTitleReg: "User Registration", phUsername: "Enter Username", phPassword: "Enter Password",
+            authBtnLogin: "Login", authBtnReg: "Register", authToggleToReg: "No account? Register here", authToggleToLogin: "Have an account? Login",
+            topTitle: "⚡ TACTICAL INVESTMENT TERMINAL", currentUser: "User:", logout: "Save & Exit",
             statValue: "Total Value", statCost: "Total Cost", statTodayPnl: "Today's P&L", statTotalPnl: "Total P&L", statReturn: "Return %",
             folderTitle: "My Private Portfolio", folderReturn: "Return: ", addAssetTitle: "[ + ] Add Asset:", phTicker: "Ticker (e.g. MU)", phCost: "Cost", phShares: "Shares", btnSave: "💾 Save Asset",
             thAsset: "Asset", thCost: "Cost", thCurrent: "Current", thShares: "Shares", thTotal: "Total Value", thHoldPnl: "Hold P&L", thTodayPnl: "Today P&L", thReturn: "Return", thAction: "Action",
             loadingData: "Fetching live data from Wall Street...", noData: "No data found. Please add assets.", btnEdit: "Edit", btnDelete: "Delete",
-            btnAlert: "🤖 Call AI Manager: Portfolio Health Check & Trade Alerts", alertLoading: "[ SYS ] AI Manager analyzing... Please wait...", alertTitle: "📊 Portfolio Health & Trade Alerts",
+            btnAlert: "🤖 Call AI Manager: Portfolio Health Check", alertLoading: "⏳ [ SYS ] AI Manager analyzing... Please wait...", alertTitle: "📊 Portfolio Health & Trade Alerts",
             chartTitle: "Performance Chart", chartTimeframe: "Timeframe:", scanTitle: "Smart Asset Scanner", phScan: "Enter Ticker (e.g. AAPL)", btnScan: "Search Data",
-            aiDefault: "✨ General Long-term", aiFinancial: "📊 Financial Deep-Dive", aiTechnical: "📉 Technical Momentum", aiStress: "⚠️ Extreme Stress Test", aiLoading: "[ SYS ] AI engine processing..."
+            aiDefault: "✨ General Long-term", aiFinancial: "📊 Financial Deep-Dive", aiTechnical: "📉 Technical Momentum", aiStress: "⚠️ Extreme Stress Test", aiLoading: "⏳ [ SYS ] AI engine processing..."
         }
     };
 
@@ -216,16 +224,16 @@
         });
 
         if(document.getElementById("mainDashboard").style.display === "block") loadDashboard();
+        else toggleAuthMode(isLoginMode);
     }
 
     window.onload = function() {
         switchLang(sysLang);
-        const token = localStorage.getItem("terminal_user_token");
-        if(token) {
+        if(currentUser) {
             document.getElementById("authBox").style.display = "none";
             document.getElementById("outNavLang").style.display = "none";
             document.getElementById("mainDashboard").style.display = "block";
-            document.getElementById("currentUserInfo").innerText = token.toUpperCase();
+            document.getElementById("currentUserInfo").innerText = currentUser.toUpperCase();
             loadDashboard();
             renderChart('AAPL', currentInterval);
         } else {
@@ -235,53 +243,80 @@
         }
     };
 
-    // 💡 纯粹安全的本地存储登录，直接跨过云端服务器的干扰
+    function toggleAuthMode(forceState = null) {
+        if(forceState !== null) isLoginMode = forceState;
+        else isLoginMode = !isLoginMode;
+        document.getElementById("authTitle").innerText = i18n[sysLang][isLoginMode ? "authTitleLogin" : "authTitleReg"];
+        document.getElementById("authBtn").innerText = i18n[sysLang][isLoginMode ? "authBtnLogin" : "authBtnReg"];
+        document.getElementById("authToggleText").innerText = i18n[sysLang][isLoginMode ? "authToggleToReg" : "authToggleToLogin"];
+    }
+
+    // 独立安全保险箱逻辑
     function handleAuth() {
         const u = document.getElementById("authUsername").value.trim();
-        if(!u) return alert(sysLang === 'en' ? "Please fill in username!" : "⚠️ 必须输入用户名！");
+        const p = document.getElementById("authPassword").value.trim();
+        if(!u || !p) return alert(sysLang === 'en' ? "Username and Password cannot be empty!" : "⚠️ 用户名和密码不能为空！");
         
-        localStorage.setItem("terminal_user_token", u);
-        window.location.reload();
-    }
+        let db = JSON.parse(localStorage.getItem("terminal_secure_db")) || {};
 
-    function logout() {
-        localStorage.removeItem("terminal_user_token");
-        localStorage.removeItem("terminal_portfolio"); // 清空本地数据
-        window.location.reload();
-    }
-
-    // 防卡死网络请求
-    async function safeFetch(endpoint, options) {
-        try {
-            return await fetch(API_BASE_URL + endpoint, options);
-        } catch(e) {
-            if(e.message === "Failed to fetch") {
-                console.error("Connection Failed. Server might be sleeping.");
-            }
-            throw e;
+        if (!isLoginMode) {
+            if (db[u]) return alert(sysLang === 'en' ? "Account exists. Please login." : "⚠️ 该用户名已存在，请直接登录！");
+            db[u] = { password: p, portfolio: [] };
+            localStorage.setItem("terminal_secure_db", JSON.stringify(db));
+            alert(sysLang === 'en' ? "Registration successful!" : "🎉 注册成功！请切换到登录界面进行登录。");
+            toggleAuthMode(true);
+        } else {
+            if (!db[u] || db[u].password !== p) return alert(sysLang === 'en' ? "Invalid credentials!" : "❌ 用户名或密码错误！");
+            localStorage.setItem("terminal_current_user", u);
+            window.location.reload();
         }
     }
 
-    // 💡 彻底抛弃云端数据库，直接读取本地数据去云端拿价格，极速！
+    // 保存并退出（绝不删除用户的 portfolio 数据）
+    function logout() {
+        localStorage.removeItem("terminal_current_user"); // 只清除当前的登录状态
+        window.location.reload();
+    }
+
+    function getUserPortfolio() {
+        if(!currentUser) return [];
+        let db = JSON.parse(localStorage.getItem("terminal_secure_db")) || {};
+        return db[currentUser] ? db[currentUser].portfolio : [];
+    }
+
+    function saveUserPortfolio(newPortfolio) {
+        if(!currentUser) return;
+        let db = JSON.parse(localStorage.getItem("terminal_secure_db")) || {};
+        db[currentUser].portfolio = newPortfolio;
+        localStorage.setItem("terminal_secure_db", JSON.stringify(db));
+    }
+
+    async function safeFetch(endpoint, options) {
+        const res = await fetch(API_BASE_URL + endpoint, options);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res;
+    }
+
     async function loadDashboard() {
+        let portfolio = getUserPortfolio();
         let totalVal = 0, totalCost = 0, grandTodayPnl = 0;
         const tbody = document.getElementById('portfolio-body');
         tbody.innerHTML = ""; 
 
-        if(userPortfolio.length === 0) {
+        if(portfolio.length === 0) {
             document.getElementById('globalValue').innerText = "$0.00";
             document.getElementById('globalCost').innerText = "$0.00";
             document.getElementById('globalTodayPnl').innerText = "$0.00";
             document.getElementById('globalTotalPnl').innerText = "$0.00";
             document.getElementById('globalReturn').innerText = "0.00%";
-            tbody.innerHTML = `<tr><td colspan="9" style="color: #8b949e;">${i18n[sysLang]["noData"]}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" style="padding: 30px; color: #8b949e;">${i18n[sysLang]["noData"]}</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = `<tr><td colspan="9" style="color: #8b949e;">${i18n[sysLang]["loadingData"]}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="padding: 30px; color: #8b949e;">${i18n[sysLang]["loadingData"]}</td></tr>`;
         let htmlRows = "";
 
-        for (let item of userPortfolio) {
+        for (let item of portfolio) {
             try {
                 const res = await safeFetch(`/api/stock/${item.symbol}`, { method: "GET" });
                 const s_data = await res.json();
@@ -319,7 +354,24 @@
                     </tr>
                 `;
             } catch (e) {
-                htmlRows += `<tr><td colspan="9" style="color: #f85149;">Error loading ${item.symbol}</td></tr>`;
+                // 防 NaN 机制
+                const totCost = item.cost_price * item.shares;
+                totalCost += totCost; 
+                totalVal += totCost; 
+                
+                let errorMsg = sysLang === 'en' ? "⚠️ API Limited (Too Many Requests). Check back later." : "⚠️ 接口受限 (Too Many Requests)，请稍后重试。";
+                
+                htmlRows += `
+                    <tr>
+                        <td style="color: #58a6ff; font-weight: bold;">${item.symbol}</td>
+                        <td>$${item.cost_price.toFixed(2)}</td>
+                        <td colspan="6" style="color: #d29922; font-size: 13px;">${errorMsg}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editStock('${item.symbol}', ${item.cost_price}, ${item.shares})">${i18n[sysLang]["btnEdit"]}</button>
+                            <button class="btn-delete" onclick="deleteStock('${item.symbol}')">${i18n[sysLang]["btnDelete"]}</button>
+                        </td>
+                    </tr>
+                `;
             }
         }
 
@@ -330,61 +382,73 @@
 
         document.getElementById('globalValue').innerText = `$${totalVal.toFixed(2)}`;
         document.getElementById('globalCost').innerText = `$${totalCost.toFixed(2)}`;
-        document.getElementById('globalTodayPnl').innerText = `${grandTodayPnl >= 0 ? '+' : ''}$${grandTodayPnl.toFixed(2)}`;
-        document.getElementById('globalTodayPnl').className = `val ${grandTodayPnl >= 0 ? 'profit' : 'loss'}`;
-        document.getElementById('globalTotalPnl').innerText = `${grandPlVal >= 0 ? '+' : ''}$${grandPlVal.toFixed(2)}`;
-        document.getElementById('globalTotalPnl').className = `val ${grandPlVal >= 0 ? 'profit' : 'loss'}`;
-        document.getElementById('globalReturn').innerText = `${grandPlPct >= 0 ? '+' : ''}${grandPlPct.toFixed(2)}%`;
-        document.getElementById('globalReturn').className = `val ${grandPlPct >= 0 ? 'profit' : 'loss'}`;
-        document.getElementById('folderReturn').innerText = `${i18n[sysLang]["folderReturn"]}${grandPlPct >= 0 ? '+' : ''}${grandPlPct.toFixed(2)}%`;
+        
+        if (grandTodayPnl === 0 && grandPlVal === 0 && totalVal === totalCost && totalVal > 0) {
+            document.getElementById('globalTodayPnl').innerText = "-";
+            document.getElementById('globalTodayPnl').className = 'val neutral';
+            document.getElementById('globalTotalPnl').innerText = "-";
+            document.getElementById('globalTotalPnl').className = 'val neutral';
+            document.getElementById('globalReturn').innerText = "-";
+            document.getElementById('globalReturn').className = 'val neutral';
+            document.getElementById('folderReturn').innerText = `${i18n[sysLang]["folderReturn"]} -`;
+            document.getElementById('folderReturn').className = 'neutral';
+        } else {
+            document.getElementById('globalTodayPnl').innerText = `${grandTodayPnl >= 0 ? '+' : ''}$${grandTodayPnl.toFixed(2)}`;
+            document.getElementById('globalTodayPnl').className = `val ${grandTodayPnl >= 0 ? 'profit' : 'loss'}`;
+            document.getElementById('globalTotalPnl').innerText = `${grandPlVal >= 0 ? '+' : ''}$${grandPlVal.toFixed(2)}`;
+            document.getElementById('globalTotalPnl').className = `val ${grandPlVal >= 0 ? 'profit' : 'loss'}`;
+            document.getElementById('globalReturn').innerText = `${grandPlPct >= 0 ? '+' : ''}${grandPlPct.toFixed(2)}%`;
+            document.getElementById('globalReturn').className = `val ${grandPlPct >= 0 ? 'profit' : 'loss'}`;
+            document.getElementById('folderReturn').innerText = `${i18n[sysLang]["folderReturn"]}${grandPlPct >= 0 ? '+' : ''}${grandPlPct.toFixed(2)}%`;
+            document.getElementById('folderReturn').className = grandPlPct >= 0 ? 'profit' : 'loss';
+        }
     }
 
     function editStock(symbol, cost, shares) {
         document.getElementById('addTicker').value = symbol;
-        document.getElementById('addTicker').disabled = true; 
         document.getElementById('addCost').value = cost;
         document.getElementById('addShares').value = shares;
     }
 
-    // 💡 本地无缝保存数据
     function saveStock() {
         const symbol = document.getElementById('addTicker').value.trim().toUpperCase();
         const cost_price = parseFloat(document.getElementById('addCost').value);
         const shares = parseFloat(document.getElementById('addShares').value);
-        if(!symbol || isNaN(cost_price) || isNaN(shares)) return alert("Error/格式错误");
+        if(!symbol || isNaN(cost_price) || isNaN(shares)) return alert("⚠️ 请完整填写正确的数字！");
 
-        let existing = userPortfolio.find(i => i.symbol === symbol);
+        let portfolio = getUserPortfolio();
+        let existing = portfolio.find(i => i.symbol === symbol);
         if(existing) {
             existing.cost_price = cost_price;
             existing.shares = shares;
         } else {
-            userPortfolio.push({symbol, cost_price, shares});
+            portfolio.push({symbol, cost_price, shares});
         }
         
-        localStorage.setItem("terminal_portfolio", JSON.stringify(userPortfolio));
+        saveUserPortfolio(portfolio);
         
         document.getElementById('addTicker').value = "";
-        document.getElementById('addTicker').disabled = false;
         document.getElementById('addCost').value = "";
         document.getElementById('addShares').value = "";
         loadDashboard();
     }
 
     function deleteStock(symbol) {
-        if(!confirm(`Delete / 删除 ${symbol}?`)) return;
-        userPortfolio = userPortfolio.filter(i => i.symbol !== symbol);
-        localStorage.setItem("terminal_portfolio", JSON.stringify(userPortfolio));
+        if(!confirm(`Delete / 确认删除 ${symbol} 吗?`)) return;
+        let portfolio = getUserPortfolio();
+        portfolio = portfolio.filter(i => i.symbol !== symbol);
+        saveUserPortfolio(portfolio);
         loadDashboard();
     }
 
-    // 💡 直接打包本地数据传给 AI 处理，安全且不怕掉线
     async function checkPortfolioAlert() {
-        if (userPortfolio.length === 0) return;
+        let portfolio = getUserPortfolio();
+        if (portfolio.length === 0) return;
         document.getElementById('alertLoading').style.display = 'block';
         document.getElementById('alertCard').style.display = 'none';
         try {
             let snapshot = "";
-            for (let item of userPortfolio) {
+            for (let item of portfolio) {
                  snapshot += `[${item.symbol}] Cost: $${item.cost_price} | Shares: ${item.shares}\n`;
             }
             const res = await safeFetch(`/api/portfolio-alert`, { 
@@ -394,7 +458,10 @@
             const data = await res.json();
             document.getElementById('alertContent').innerText = data.alert_report;
             document.getElementById('alertCard').style.display = 'block';
-        } catch(e) {} 
+        } catch(e) {
+            document.getElementById('alertContent').innerText = "⚠️ 接口受限 (Too Many Requests)，请稍后再试。";
+            document.getElementById('alertCard').style.display = 'block';
+        } 
         finally { document.getElementById('alertLoading').style.display = 'none'; }
     }
 
@@ -426,7 +493,10 @@
             const data = await res.json();
             document.getElementById('stockResult').style.display = 'block';
             document.getElementById('stockResult').innerHTML = `<strong>${data.name || data.symbol}</strong> ($${data.current_price}) | PE: ${data.pe_ratio || 'N/A'}`;
-        } catch(e) {}
+        } catch(e) {
+            document.getElementById('stockResult').style.display = 'block';
+            document.getElementById('stockResult').innerHTML = `<span style="color:#d29922;">⚠️ 请求被限流 (Too Many Requests)，请稍后再试。</span>`;
+        }
     }
 
     async function analyzeStock(perspective) {
@@ -443,7 +513,10 @@
             const data = await res.json();
             document.getElementById('aiResult').innerText = data.ai_analysis;
             document.getElementById('aiResult').style.display = 'block';
-        } catch(e) {} 
+        } catch(e) {
+            document.getElementById('aiResult').innerText = "⚠️ 请求受限，请稍后再试。";
+            document.getElementById('aiResult').style.display = 'block';
+        } 
         finally { document.getElementById('loading').style.display = 'none'; }
     }
 </script>
